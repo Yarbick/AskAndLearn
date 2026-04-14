@@ -5,17 +5,15 @@ from flask import Flask, json
 
 # Работа с файлами
 from os import getenv
-from dotenv import load_dotenv
-from os.path import dirname
 
 # Работа с временем
 from datetime import timedelta
 
-# Чтение настроек приложения из файлов
-load_dotenv(".env")
-with open(f"{dirname(__file__)}/config.json", mode="rb") as file:
-    config = json.load(file)
-    config["path"] = dirname(__file__)
+# Настройки приложения
+from . import config
+
+# Модули приложения
+from modules.user_node.auth import bp as auth_bp
 
 # Создание и настройка приложения
 app = Flask(
@@ -25,3 +23,5 @@ app = Flask(
 )
 app.config["SECRET_KEY"] = getenv("SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=config["permanent_session_lifetime_days"])
+# Подключение модулей
+app.register_blueprint(auth_bp)
