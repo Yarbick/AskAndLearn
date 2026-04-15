@@ -2,26 +2,26 @@
 
 # Работа с фреймворком
 from flask import Flask, json
-
-# Работа с файлами
-from os import getenv
-
-# Работа с временем
-from datetime import timedelta
+from flask_login import LoginManager
 
 # Настройки приложения
-from . import config
-
-# Модули приложения
-from modules.user_node.auth import bp as auth_bp
+from .config import Config
 
 # Создание и настройка приложения
 app = Flask(
     "AskAndLearn",
-    static_folder=config["static_folder"],
-    template_folder=config["template_folder"]
+    static_folder=Config.static_folder,
+    template_folder=Config.template_folder
 )
-app.config["SECRET_KEY"] = getenv("SECRET_KEY")
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=config["permanent_session_lifetime_days"])
+app.config["SECRET_KEY"] = Config.secret_key
+app.config["PERMANENT_SESSION_LIFETIME"] = Config.permanent_session_lifetime
+
+# Создание login-менеджера
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Модули приложения
+from nodes.user_node.modules.auth_module import bp as auth_bp
+
 # Подключение модулей
 app.register_blueprint(auth_bp)

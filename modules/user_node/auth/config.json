@@ -1,8 +1,0 @@
-{
-  "name": "auth",
-  "url_prefix": "/auth",
-  "self_templates_folder": "templates",
-  "other_templates_folders": [
-    "shared_templates"
-  ]
-}

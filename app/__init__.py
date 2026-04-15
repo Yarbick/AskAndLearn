@@ -1,17 +1,4 @@
 """Инициализация приложения"""
 
-# Работа с фреймворком
-from flask import json
-
-# Работа с файлами
-from dotenv import load_dotenv
-from os.path import dirname
-
-# Чтение настроек приложения из файлов
-load_dotenv(".env")
-with open(f"{dirname(__file__)}/config.json", mode="rb") as file:
-    config = json.load(file)
-    config["path"] = dirname(__file__)
-
 # Создание главного приложения
 from .app import app

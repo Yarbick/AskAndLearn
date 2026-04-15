@@ -15,6 +15,7 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 pip==23.2.1
 psycopg2-binary==2.9.11
+python-dotenv==1.2.2
 pytz==2026.1.post1
 requests==2.33.1
 setuptools==82.0.1

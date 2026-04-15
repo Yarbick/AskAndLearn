@@ -1,5 +1,0 @@
-{
-  "static_folder": "shared_static",
-  "template_folder": "shared_templates",
-  "permanent_session_lifetime_days": 7
-}
