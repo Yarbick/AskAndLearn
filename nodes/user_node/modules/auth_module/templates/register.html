@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block styles %}
+    <link href="{{ url_for('auth.static', filename='css/auth.css') }}" type="text/css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="auth-container">
+        <h1 class="content-header">Register</h1>
+        <form action="" method="post">
+            {{ register_form.hidden_tag() }}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+            <div class="mb-3">
+                <label for="nameField" class="form-label">{{ register_form.name.label }}</label>
+                {{ register_form.name(type="text", id="nameField", class="form-control") }}
+            </div>
+            <div class="mb-3">
+                <label for="loginField" class="form-label">{{ register_form.login.label }}</label>
+                {{ register_form.login(type="text", class="form-control", id="loginField") }}
+            </div>
+            <div class="mb-3">
+                <label for="passwordField" class="form-label">{{ register_form.password.label }}</label>
+                {{ register_form.password(type="password", id="passwordField", class="form-control") }}
+            </div>
+            <div class="mb-3">
+                <label for="repeatPasswordField" class="form-label">{{ register_form.repeat_password.label }}</label>
+                {{ register_form.repeat_password(type="password", id="repeatPasswordField", class="form-control") }}
+            </div>
+            <div class="mb-3 form-check">
+                <label class="form-check-label" for="rememberMeCheck">{{ register_form.remember_me.label }}</label>
+                {{ register_form.remember_me(type="checkbox", class="form-check-input", id="rememberMeCheck") }}
+            </div>
+            <div class="d-grid gap-2">
+                {{ register_form.submit(type="submit", class="btn btn-primary", align="center") }}
+            </div>
+        </form>
+    </div>
+{% endblock %}

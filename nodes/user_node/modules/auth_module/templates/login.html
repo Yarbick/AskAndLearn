@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block styles %}
+    <link href="{{ url_for('auth.static', filename='css/auth.css') }}" type="text/css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="auth-container">
+        <h1 class="content-header">Login</h1>
+        <form action="" method="post">
+            {{ login_form.hidden_tag() }}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+            <div class="mb-3">
+                <label for="loginField" class="form-label">{{ login_form.login.label }}</label>
+                {{ login_form.login(type="text", class="form-control", id="loginField") }}
+            </div>
+            <div class="mb-3">
+                <label for="passwordField" class="form-label">{{ login_form.password.label }}</label>
+                {{ login_form.password(type="password", id="passwordField", class="form-control") }}
+            </div>
+            <div class="mb-3 form-check">
+                <label class="form-check-label" for="rememberMeCheck">{{ login_form.remember_me.label }}</label>
+                {{ login_form.remember_me(type="checkbox", class="form-check-input", id="rememberMeCheck") }}
+            </div>
+            <div class="d-grid gap-2">
+                {{ login_form.submit(type="submit", class="btn btn-primary", align="center") }}
+            </div>
+        </form>
+    </div>
+{% endblock %}
