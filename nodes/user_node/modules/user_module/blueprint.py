@@ -1,4 +1,4 @@
-"""Auth Blueprint"""
+"""User Blueprint"""
 
 # Работа с фреймворком
 from flask import Blueprint

@@ -13,8 +13,8 @@ class Config:
 
     # Параметры
     path = dirname(__file__)
-    name = "auth"
-    url_prefix = "/auth"
+    name = "user"
+    url_prefix = "/user"
     static_folder = "static"
     static_url_path = join_path(path, static_folder)
     self_template_folder = join_path(path, "templates")

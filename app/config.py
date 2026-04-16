@@ -24,6 +24,7 @@ class Config:
     # Параметры
     path = dirname(__file__)
     secret_key = getenv("SECRET_KEY")
-    static_folder = join_path(path, "shared_static")
+    static_folder = "shared_static"
+    static_url_path = "/"
     template_folder = join_path(path, "shared_templates")
     permanent_session_lifetime = timedelta(days=7)
