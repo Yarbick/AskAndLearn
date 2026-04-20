@@ -1,0 +1,22 @@
+.profile-user-header-container {
+    display: flex;
+    gap: 25px;
+}
+.profile-user-name {
+    font-size: 60px;
+}
+.profile-user-login {
+    font-size: 30px;
+    color: #aaaaaa;
+}
+.profile-user-icon {
+    width: 250px;
+    height: 250px;
+    border: 5px solid #cccccc;
+    border-radius: 100%;
+}
+.profile-error-message {
+    font-size: 50px;
+    text-align: center;
+    margin: 25%;
+}
