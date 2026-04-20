@@ -9,21 +9,21 @@
 {% block content %}
     <div class="auth-container">
         <h1 class="content-header">Login</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
         <form action="" method="post">
             {{ login_form.hidden_tag() }}
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endwith %}
             <div class="mb-3">
-                <label for="loginField" class="form-label">{{ login_form.login.label }}</label>
+                <h5><label for="loginField" class="form-label">{{ login_form.login.label }}</label></h5>
                 {{ login_form.login(type="text", class="form-control", id="loginField") }}
             </div>
             <div class="mb-3">
-                <label for="passwordField" class="form-label">{{ login_form.password.label }}</label>
+                <h5><label for="passwordField" class="form-label">{{ login_form.password.label }}</label></h5>
                 {{ login_form.password(type="password", id="passwordField", class="form-control") }}
             </div>
             <div class="mb-3 form-check">
@@ -35,4 +35,5 @@
             </div>
         </form>
     </div>
+    <p align="center">Don’t have an account? <a href="{{ url_for('auth.register') }}">Register</a></p>
 {% endblock %}

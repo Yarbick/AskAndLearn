@@ -1,11 +1,14 @@
 """Обработчики маршрутов модуля Auth"""
 
 # Работа с фреймворком
-from flask import render_template, url_for, flash, redirect, request, jsonify
+from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_required, login_user, logout_user, current_user
 
 # Подключение к модулю
 from .blueprint import bp
+
+# Безопасность
+from security.csrf import create_csrf_request_session
 
 # Работа с REST API
 import requests
@@ -13,6 +16,7 @@ import requests
 # Формы
 from .forms.register import RegisterForm
 from .forms.login import LoginForm
+from .forms.change_password import ChangePasswordForm
 
 # Работа с ORM
 from user_node import db_manager
@@ -34,14 +38,18 @@ def register():
             return redirect(url_for("auth.register"))
 
         # Создание пользователя через REST API
+        # Подготовка данных
         server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
-        response = requests.post(
+        request_session: requests.Session = create_csrf_request_session(server_address)
+        json_params = {
+            "name": register_form.name.data,
+            "login": register_form.login.data,
+            "password": register_form.password.data
+        }
+        # Запрос
+        response: requests.Response = request_session.post(
             f"{server_address}/api/v1/users",
-            json={
-                "name": register_form.name.data,
-                "login": register_form.login.data,
-                "password": register_form.password.data
-            }
+            json=json_params
         )
 
         # Вход в созданный аккаунт
@@ -104,7 +112,6 @@ def login():
 
 
 @bp.route("/logout", methods=["GET"])
-@login_required
 def logout():
     """Выход из аккаунта"""
 
@@ -112,3 +119,59 @@ def logout():
     logout_user()
     # Переключение на главную страницу
     return redirect("/")
+
+
+@bp.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    """Изменение пароля"""
+
+    # Форма для изменения пароля
+    change_password_form = ChangePasswordForm()
+
+    # Процесс изменения пароля (POST)
+    if change_password_form.validate_on_submit():
+        # Проверка на совпадение логинов
+        if not current_user.login == change_password_form.login.data:
+            flash("Invalid login", "error")
+            return redirect(url_for("auth.change_password"))
+        # Проверка на совпадение паролей
+        if not current_user.check_password(change_password_form.old_password.data):
+            flash("Invalid password", "error")
+            return redirect(url_for("auth.change_password"))
+        # Проверка на совпадение новых паролей
+        if change_password_form.new_password.data != change_password_form.repeat_new_password.data:
+            flash("New passwords don't match", "error")
+            return redirect(url_for("auth.change_password"))
+
+        # Изменение пароля через REST API
+        # Подготовка данных
+        server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+        request_session: requests.Session = create_csrf_request_session(server_address)
+        json_params = {
+            "password": change_password_form.new_password.data
+        }
+        # Запрос
+        response: requests.Response = request_session.put(
+            f"{server_address}/api/v1/users/{current_user.id}",
+            json=json_params,
+            cookies=request.cookies
+        )
+
+        # Проверка на успешность выполнения
+        if response:
+            # Возвращение на страницу редактирования профиля пользователя
+            return redirect(url_for("user.profile_edit"))
+        else:
+            # Вывод ошибки, если что-то пошло не так
+            try:
+                flash(response.json()["error"], "error")
+            except:
+                flash("Something went wrong", "error")
+            return redirect(url_for("auth.change_password"))
+
+    # Отображение страницы (GET)
+    return render_template(
+        "change_password.html",
+        change_password_form=change_password_form
+    )

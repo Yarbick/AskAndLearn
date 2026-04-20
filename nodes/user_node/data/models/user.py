@@ -3,10 +3,12 @@
 # Работа с фреймворком
 from app.app import login_manager
 
+# Безопасность
+from werkzeug.security import generate_password_hash, check_password_hash
+
 # Работа с ORM
 import sqlalchemy as sa
 from .. import db_manager
-from werkzeug.security import generate_password_hash, check_password_hash
 # "Примеси" для модели
 from sqlalchemy_serializer import SerializerMixin
 from flask_login import UserMixin, login_user
@@ -24,6 +26,7 @@ class User(UserMixin, SerializerMixin, db_manager.declarative_base):
     login = sa.Column("login", sa.String, nullable=False, unique=True)
     password = sa.Column("password", sa.String, nullable=False)
     description = sa.Column("description", sa.String, nullable=True)
+    icon = sa.Column("icon", sa.String, nullable=True)
 
     def set_password(self, password: str) -> None:
         """Изменение пароля"""

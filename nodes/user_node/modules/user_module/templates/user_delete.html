@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Delete account{% endblock %}
+
+{% block styles %}
+    <link href="{{ url_for('user.static', filename='css/user.css') }}" type="text/css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1 class="content-header" style="margin-bottom: 2.5%;">Delete account</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Warning!</h4>
+            <p>Deleting an account is an irreversible action. You will not be able to restore it in any way in the future, so think again if you need to delete it</p>
+            <hr>
+            <p class="mb-0">To confirm your intentions, enter your details in the form</p>
+        </div>
+        <form action="" method="post">
+            {{ delete_form.hidden_tag() }}
+            <div class="mb-3">
+                <h5><label for="loginField" class="form-label">{{ delete_form.login.label }}</label></h5>
+                {{ delete_form.login(type="text", class="form-control", id="loginField") }}
+            </div>
+            <div class="mb-3">
+                <h5><label for="passwordField" class="form-label">{{ delete_form.password.label }}</label></h5>
+                {{ delete_form.password(type="password", id="passwordField", class="form-control") }}
+            </div>
+            <div class="mb-3 form-check">
+                <label class="form-check-label" for="acceptDeletingCheck">{{ delete_form.accept_deleting.label }}</label>
+                {{ delete_form.accept_deleting(type="checkbox", class="form-check-input", id="acceptDeletingCheck") }}
+            </div>
+            <div class="d-inline-flex gap-1" style="width: 100%">
+                {{ delete_form.submit(type="submit", class="btn btn-danger", align="center", style="width: 50%;") }}
+                <a type="button" class="btn btn-success" style="width: 50%;"
+                   href="{{ url_for('user.profile', user_id=current_user.id) }}">
+                    Back
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

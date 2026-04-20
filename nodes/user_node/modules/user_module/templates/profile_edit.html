@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Profile edit{% endblock %}
+
+{% block styles %}
+    <link href="{{ url_for('user.static', filename='css/user.css') }}" type="text/css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+        <form action="" method="post" enctype="multipart/form-data">
+            {{ profile_edit_form.hidden_tag() }}
+            <div class="profile-user-header-container">
+                {% if current_user.icon %}
+                    <img src="{{ url_for('user.static', filename='users_icons/' + current_user.icon) }}"
+                         class="profile-user-icon" alt="Download error">
+                {% else %}
+                    <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
+                         class="profile-user-icon" alt="Download error">
+                {% endif %}
+                <div>
+                    <div class="mb-3">
+                        <h5><label for="nameField" class="form-label">
+                            {{ profile_edit_form.name.label }}
+                        </label></h5>
+                        {{ profile_edit_form.name(type="text", id="nameField", class="form-control") }}
+                    </div>
+                    <a type="button" class="btn btn-primary"
+                       href="{{ url_for('auth.change_password') }}">
+                        Change password
+                    </a>
+                    <h5><label class="form-label" for="iconFile" style="margin-top: 10px;">{{ profile_edit_form.icon.label }}</label></h5>
+                    <div class="d-inline-flex gap-1">
+                        {{ profile_edit_form.icon(class="form-control", type="file", id="iconFile", accept=".jpg,.jpeg,.png,.webp") }}
+                        <a type="button" class="btn btn-danger" href="{{ url_for('user.delete_icon') }}" style="width: 150px;">Delete icon</a>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3" style="margin-top: 2.5%;">
+                <h3><label for="descriptionTextarea" class="form-label">
+                    {{ profile_edit_form.description.label }}
+                </label></h3>
+                {{ profile_edit_form.description(class="form-control", id="descriptionTextarea", rows="6") }}
+            </div>
+            <div class="d-inline-flex gap-1" style="width: 100%; margin-top: 2.5%;">
+                {{ profile_edit_form.submit(type="submit", class="btn btn-primary", align="center", style="width: 50%;") }}
+                <a type="button" class="btn btn-danger" style="width: 50%;"
+                   href="{{ url_for('user.profile', user_id=current_user.id) }}">
+                    Back
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

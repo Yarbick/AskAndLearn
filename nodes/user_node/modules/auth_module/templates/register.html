@@ -9,29 +9,29 @@
 {% block content %}
     <div class="auth-container">
         <h1 class="content-header">Register</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
         <form action="" method="post">
             {{ register_form.hidden_tag() }}
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endwith %}
             <div class="mb-3">
-                <label for="nameField" class="form-label">{{ register_form.name.label }}</label>
+                <h5><label for="nameField" class="form-label">{{ register_form.name.label }}</label></h5>
                 {{ register_form.name(type="text", id="nameField", class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="loginField" class="form-label">{{ register_form.login.label }}</label>
+                <h5><label for="loginField" class="form-label">{{ register_form.login.label }}</label></h5>
                 {{ register_form.login(type="text", class="form-control", id="loginField") }}
             </div>
             <div class="mb-3">
-                <label for="passwordField" class="form-label">{{ register_form.password.label }}</label>
+                <h5><label for="passwordField" class="form-label">{{ register_form.password.label }}</label></h5>
                 {{ register_form.password(type="password", id="passwordField", class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="repeatPasswordField" class="form-label">{{ register_form.repeat_password.label }}</label>
+                <h5><label for="repeatPasswordField" class="form-label">{{ register_form.repeat_password.label }}</label></h5>
                 {{ register_form.repeat_password(type="password", id="repeatPasswordField", class="form-control") }}
             </div>
             <div class="mb-3 form-check">

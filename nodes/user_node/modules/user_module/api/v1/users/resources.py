@@ -28,12 +28,12 @@ class UserResource(Resource):
             UserValidators.is_exists(user)
 
         # Вывод результата
-        return jsonify({"user": user.to_dict(only=["id", "name", "login", "password"])})
+        return jsonify({"user": user.to_dict(only=["id", "name", "login", "password", "description", "icon"])})
 
     def put(self, user_id: int):
         # Получение данных из парсера
-        user_data: dict = UserParsers.post_put_parser.parse_args()
-        user_password: str = user_data.pop("password")
+        user_data: dict = UserParsers.put_parser.parse_args()
+        user_password: str = user_data.pop("password", None)
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
@@ -46,8 +46,8 @@ class UserResource(Resource):
 
                 # Изменение пользователя
                 for field_name, value in user_data.items():
-                    setattr(user, field_name, value)
-                user.set_password(user_password)
+                    if value is not None: setattr(user, field_name, value)
+                if user_password: user.set_password(user_password)
 
                 # Сохранение изменений
                 db_session.commit()
@@ -88,7 +88,7 @@ class UserListResource(Resource):
 
     def post(self):
         # Получение данных из парсера
-        user_data: dict = UserParsers.post_put_parser.parse_args()
+        user_data: dict = UserParsers.post_parser.parse_args()
         user_password: str = user_data.pop("password")
 
         # Добавление в БД

@@ -7,6 +7,9 @@ from flask_login import LoginManager
 # Настройки приложения
 from .config import Config
 
+# Работа с формами
+from flask_wtf import CSRFProtect
+
 # Создание и настройка приложения
 app = Flask(
     "AskAndLearn",
@@ -15,7 +18,14 @@ app = Flask(
     template_folder=Config.template_folder
 )
 app.config["SECRET_KEY"] = Config.secret_key
+app.config["MAX_CONTENT_LENGTH"] = Config.max_content_length
 app.config["PERMANENT_SESSION_LIFETIME"] = Config.permanent_session_lifetime
+app.config['WTF_CSRF_ENABLED'] = Config.wtf_csrf_enabled
+app.config['WTF_CSRF_CHECK_DEFAULT'] = Config.wtf_csrf_check_default
+app.config['WTF_CSRF_HEADERS'] = Config.wtf_csrf_headers
+
+# Инициализация CSRF-защиты
+csrf_protect = CSRFProtect(app)
 
 # Создание login-менеджера
 login_manager = LoginManager()
@@ -29,12 +39,3 @@ from nodes.user_node.modules.user_module import bp as user_bp, api_bp as user_ap
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(user_api_bp)
-
-
-# Временный обработчик для главной страницы
-@app.route("/")
-def root():
-    from flask import render_template
-    from flask_login import current_user
-
-    return render_template("base.html", user=current_user)

@@ -27,4 +27,8 @@ class Config:
     static_folder = "shared_static"
     static_url_path = "/"
     template_folder = join_path(path, "shared_templates")
+    max_content_length = 16 * 1024 * 1024
+    wtf_csrf_enabled = True
+    wtf_csrf_check_default = True
+    wtf_csrf_headers = ['X-CSRFToken']
     permanent_session_lifetime = timedelta(days=7)

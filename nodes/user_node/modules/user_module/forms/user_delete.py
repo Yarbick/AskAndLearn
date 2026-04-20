@@ -1,4 +1,4 @@
-"""Форма авторизации"""
+"""Форма удаления пользователя"""
 
 # Работа с формами
 from flask_wtf import FlaskForm
@@ -6,11 +6,11 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
 
 
-class LoginForm(FlaskForm):
-    """Форма авторизации"""
+class UserDeleteForm(FlaskForm):
+    """Форма удаления пользователя"""
 
     # Поля
     login = StringField("Login", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
-    remember_me = BooleanField("Remember me")
-    submit = SubmitField("Login")
+    accept_deleting = BooleanField("I confirm the deletion of my account", validators=[DataRequired()])
+    submit = SubmitField("Delete")
