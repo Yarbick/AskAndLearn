@@ -34,10 +34,11 @@ login_manager.init_app(app)
 # Модули приложения
 from nodes.user_node.modules.auth_module import bp as auth_bp
 from nodes.user_node.modules.user_module import bp as user_bp, api_bp as user_api_bp
-from nodes.user_node.modules.friendship_module import bp as friendship_bp
+from nodes.user_node.modules.friendship_module import bp as friendship_bp, api_bp as friendship_api_bp
 
 # Регистрация модулей
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(user_api_bp)
 app.register_blueprint(friendship_bp)
+app.register_blueprint(friendship_api_bp)
