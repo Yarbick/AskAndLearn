@@ -14,6 +14,7 @@ from .validators import FriendshipAborts, FriendshipValidators
 # Работа с ORM
 from user_node import db_manager
 from user_node.data.models.friendship import Friendship
+from user_node.data.models.friendship_status import FriendshipStatus
 
 
 class FriendshipResource(Resource):
@@ -28,8 +29,10 @@ class FriendshipResource(Resource):
             # Проверки
             FriendshipValidators.is_exists(friendship)
 
-        # Вывод результата
-        return jsonify({"friendship": friendship.to_dict(only=["user_id", "friend_id", "status"])})
+            # Вывод результата
+            return jsonify({"friendship": friendship.to_dict(only=[
+                "user.id", "user.name", "user.icon", "friend.id", "friend.name", "friend.icon", "status"
+            ])})
 
     def put(self, user_id: int, friend_id: int):
         # Получение данных из парсера
@@ -78,12 +81,19 @@ class FriendshipListResource(Resource):
     """Ресурс списка друзей у пользователя"""
 
     def get(self, user_id: int):
+        # Получение данных из парсера
+        filter_params = FriendshipParsers.get_list_parser.parse_args()
+
         # Получение дружб из БД
         with db_manager.create_session() as db_session:
-            friendships: list[Friendship] = db_session.query(Friendship).filter(Friendship.user_id == user_id).all()
+            friendships: list[Friendship] = db_session.query(Friendship).join(Friendship.status).filter(
+                Friendship.user_id == user_id, FriendshipStatus.name.in_(filter_params["status"])
+            ).all()
 
-        # Вывод результата
-        return jsonify({"friendships": [friendsh.to_dict(only=["friend_id", "status"]) for friendsh in friendships]})
+            # Вывод результата
+            return jsonify({"friendships": [friendship.to_dict(only=[
+                "friend.id", "friend.name", "friend.icon", "status.name"]) for friendship in friendships
+            ]})
 
     def post(self, user_id: int):
         # Получение данных из парсера
