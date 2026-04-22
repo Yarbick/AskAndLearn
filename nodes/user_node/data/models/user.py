@@ -33,8 +33,8 @@ class User(UserMixin, SerializerMixin, db_manager.declarative_base):
     icon = sa.Column("icon", sa.String, nullable=True)
 
     # Связь с моделями
-    friendship_as_user = orm.relationship("Friendship", foreign_keys=[Friendship.user_id], back_populates="user")
-    friendship_as_friend = orm.relationship("Friendship", foreign_keys=[Friendship.friend_id], back_populates="friend")
+    friendships_as_user = orm.relationship("Friendship", foreign_keys=[Friendship.user_id], back_populates="user")
+    friendships_as_friend = orm.relationship("Friendship", foreign_keys=[Friendship.friend_id], back_populates="friend")
 
     def set_password(self, password: str) -> None:
         """Изменение пароля"""
