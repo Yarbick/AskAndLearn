@@ -8,7 +8,7 @@
 
 {% block content %}
     <div class="content-container">
-        <h1 class="content-header" style="margin-bottom: 2.5%;">Delete account</h1>
+        <h1 class="content-header-left">Delete account</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
                 <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">

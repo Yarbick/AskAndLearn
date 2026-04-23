@@ -9,6 +9,11 @@ from dataclasses import dataclass
 
 @dataclass
 class UserParsers:
+    get_list_parser = reqparse.RequestParser()
+    get_list_parser.add_argument(
+        "search", type=str, nullable=True
+    )
+
     post_parser = reqparse.RequestParser()
     post_parser.add_argument("name", type=str, required=True)
     post_parser.add_argument("login", type=str, required=True)

@@ -22,7 +22,8 @@ from os import remove as remove_file
 
 # Формы
 from .forms.profile_edit import ProfileEditForm
-from .forms.user_delete import UserDeleteForm
+from .forms.delete import DeleteForm
+from .forms.search import SearchForm
 
 
 @bp.route("/<int:user_id>/profile", methods=["GET"])
@@ -37,7 +38,6 @@ def profile(user_id: int):
     # Отображение страницы (GET)
     return render_template(
         "profile.html",
-        current_user=current_user,
         displayed_user=displayed_user
     )
 
@@ -109,8 +109,7 @@ def profile_edit():
     # Отображение страницы (GET)
     return render_template(
         "profile_edit.html",
-        profile_edit_form=profile_edit_form,
-        current_user=current_user
+        profile_edit_form=profile_edit_form
     )
 
 
@@ -120,7 +119,7 @@ def delete():
     """Удаление пользователя"""
 
     # Форма удаления пользователя
-    delete_form = UserDeleteForm()
+    delete_form = DeleteForm()
 
     # Удаление аккаунта (POST)
     if delete_form.validate_on_submit():
@@ -165,9 +164,8 @@ def delete():
 
     # Отображение страницы (GET)
     return render_template(
-        "user_delete.html",
-        delete_form=delete_form,
-        current_user=current_user
+        "delete.html",
+        delete_form=delete_form
     )
 
 
@@ -196,3 +194,49 @@ def delete_icon():
 
     # Возвращение к редактированию профиля
     return redirect(url_for("user.profile_edit"))
+
+
+@bp.route("/search", methods=["GET", "POST"])
+def search():
+    """Поиск пользователей"""
+
+    # Форма для поиска пользователей
+    search_form = SearchForm()
+
+    # Поиск (POST)
+    if search_form.validate_on_submit():
+        # Поиск пользователей через REST API
+        # Подготовка данных
+        server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+        json_params = {
+            "search": search_form.search.data
+        }
+        # Запрос
+        response = requests.get(
+            f"{server_address}/api/v1/users",
+            json=json_params
+        )
+
+        # Обработка запроса
+        if response:
+            # Получение данных
+            found_users = response.json()["users"]
+
+            # Отображение страницы (POST)
+            return render_template(
+                "search.html",
+                search_form=search_form,
+                found_users=found_users
+            )
+
+        # Отображение страницы в случае ошибки (GET)
+        flash(response.reason, "error")
+        return redirect(
+            "user.search"
+        )
+
+    # Отображение страницы (GET)
+    return render_template(
+        "search.html",
+        search_form=search_form
+    )

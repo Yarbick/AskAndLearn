@@ -8,13 +8,36 @@
     background-color: #f8f8f8;
     border-radius: 10px;
 }
+.content-sub-container {
+    padding: 1%;
+    align: center;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+}
 .content-header {
     text-align: center;
     font-size: 40px;
+    margin-bottom: 2.5%;
+}
+.content-header-left {
+    text-align: left;
+    font-size: 40px;
+    margin-bottom: 2.5%;
 }
 .user-icon {
     width: 40px;
     height: 40px;
     border: 2px solid #cccccc;
     border-radius: 100%;
+}
+.error-message {
+    font-size: 50px;
+    text-align: center;
+    padding: 25%;
+}
+.small-error-message {
+    font-size: 50px;
+    text-align: center;
+    padding: 10%;
 }
