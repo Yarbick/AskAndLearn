@@ -39,7 +39,7 @@ def register():
 
         # Создание пользователя через REST API
         # Подготовка данных
-        server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+        server_address = f"{request.scheme}://{request.host}"
         request_session: requests.Session = create_csrf_request_session(server_address)
         json_params = {
             "name": register_form.name.data,
@@ -146,7 +146,7 @@ def change_password():
 
         # Изменение пароля через REST API
         # Подготовка данных
-        server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+        server_address = f"{request.scheme}://{request.host}"
         request_session: requests.Session = create_csrf_request_session(server_address)
         json_params = {
             "password": change_password_form.new_password.data

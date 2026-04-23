@@ -4,6 +4,9 @@
 from flask import render_template, url_for, redirect, request, flash
 from flask_login import current_user, login_required
 
+# Безопасность
+from security.csrf import create_csrf_request_session
+
 # Подключение к модулю
 from .blueprint import bp
 
@@ -19,7 +22,7 @@ def create_friendship_view_handler(friendship_status: str) -> str:
 
     # Получение связей с пользователями через REST API
     # Подготовка данных
-    server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+    server_address = f"{request.scheme}://{request.host}"
     json_params = {
         "status": friendship_status.lower()
     }
@@ -70,3 +73,153 @@ def view_blocked():
     """Просмотр заблокированных аккаунтов пользователем"""
 
     return create_friendship_view_handler("blocked")
+
+
+@bp.route("/accept/<int:friend_id>", methods=["GET"])
+@login_required
+def accept(friend_id: int):
+    """Удаление связи между пользователями"""
+
+    # Удаление связи между пользователями через REST API
+    # Подготовка данных
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+    json_params = {
+        "status": "accepted"
+    }
+    # Запрос
+    response: requests.Response = request_session.put(
+        f"{server_address}/api/v1/users/{current_user.id}/friendships/{friend_id}",
+        json=json_params,
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if not response:
+        # Обработка ошибок
+        try:
+            flash(response.json()["error"], "error")
+        except:
+            flash("Something went wrong", "error")
+    else:
+        flash("Friend request accepted", "info")
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("friendship.view_pending", friend_id=friend_id))
+    return redirect(next_url)
+
+
+@bp.route("/send_request/<int:friend_id>", methods=["GET"])
+@login_required
+def send_request(friend_id: int):
+    """Создание запроса на дружбу с пользователем"""
+
+    # Создание связей между пользователями через REST API
+    # Подготовка данных
+    server_address = f"{request.scheme}://{request.host}"
+    request_session = create_csrf_request_session(server_address)
+    json_params = {
+        "friend_id": friend_id,
+        "status": "pending"
+    }
+    # Запрос
+    response = request_session.post(
+        f"{server_address}/api/v1/users/{current_user.id}/friendships",
+        json=json_params
+    )
+
+    # Обработка запроса
+    if not response:
+        # Обработка ошибок
+        try:
+            flash(response.json()["error"], "error")
+        except:
+            flash("Something went wrong", "error")
+    else:
+        flash("The request has been sent", "info")
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("user.profile", user_id=friend_id))
+    return redirect(next_url)
+
+
+@bp.route("/block/<int:friend_id>", methods=["GET"])
+@login_required
+def block(friend_id: int):
+    """Блокировка пользователя"""
+
+    # Блокировка пользователя через REST API
+    # Подготовка данных
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+    json_params = {
+        "friend_id": friend_id,
+        "status": "blocked"
+    }
+    # Запрос
+    response: requests.Response = request_session.put(
+        f"{server_address}/api/v1/users/{current_user.id}/friendships/{friend_id}",
+        json={"status": json_params["status"]},
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if not response:
+        if response.status_code == 404:
+            # Создание новых отношений с блокировкой
+            # Запрос
+            response: requests.Response = request_session.post(
+                f"{server_address}/api/v1/users/{current_user.id}/friendships",
+                json=json_params
+            )
+
+            # Обработка ошибок
+            if not response:
+                try:
+                    flash(response.json()["error"], "error")
+                except:
+                    flash("Something went wrong", "error")
+            else:
+                flash("The user is blocked", "info")
+        else:
+            # Обработка ошибок
+            try:
+                flash(response.json()["error"], "error")
+            except:
+                flash("Something went wrong", "error")
+    else:
+        flash("The user is blocked", "info")
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("user.profile", user_id=friend_id))
+    return redirect(next_url)
+
+
+@bp.route("/delete/<int:friend_id>", methods=["GET"])
+@login_required
+def delete(friend_id: int):
+    """Удаление связи между пользователями"""
+
+    # Удаление связи между пользователями через REST API
+    # Подготовка данных
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+    # Запрос
+    response: requests.Response = request_session.delete(
+        f"{server_address}/api/v1/users/{current_user.id}/friendships/{friend_id}",
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if not response:
+        # Обработка ошибок
+        try:
+            flash(response.json()["error"], "error")
+        except:
+            flash("Something went wrong", "error")
+    else:
+        flash("The friendship was successfully deleted", "info")
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("friendship.view_accepted", friend_id=friend_id))
+    return redirect(next_url)
