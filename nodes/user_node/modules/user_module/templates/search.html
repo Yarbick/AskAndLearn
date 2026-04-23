@@ -42,14 +42,6 @@
                     <h1 class="small-error-message">Nothing was found for your query</h1>
                 {% endif %}
             </div>
-        {% else %}
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% for category, message in messages[:1] %}
-                    {% if category == "error" %}
-                        <h1 class="error-message">{{ message }}</h1>
-                    {% endif %}
-                {% endfor %}
-            {% endwith %}
         {% endif %}
     </div>
 {% endblock %}

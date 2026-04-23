@@ -8,13 +8,6 @@
 
 {% block content %}
     <div class="content-container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endwith %}
         <form action="" method="post" enctype="multipart/form-data">
             {{ profile_edit_form.hidden_tag() }}
             <div class="profile-user-header-container">

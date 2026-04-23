@@ -9,13 +9,6 @@
 {% block content %}
     <div class="content-container">
         <h1 class="content-header-left">Delete account</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endwith %}
         <div class="alert alert-danger" role="alert">
             <h4 class="alert-heading">Warning!</h4>
             <p>Deleting an account is an irreversible action. You will not be able to restore it in any way in the future, so think again if you need to delete it</p>

@@ -8,9 +8,9 @@
 
 {% block content %}
     <div class="content-container">
-        <h1 class="content-header-left">{{ title }}</h1>
+        <h1 class="content-header-primary">{{ title }}</h1>
         {% if not error_message and error_message != "" %}
-            <ul class="nav nav-tabs" style="margin-left: 3px;">
+            <ul class="nav nav-tabs" style="margin-left: 10px; margin-right: 10px;">
                 <li class="nav-item">
                     <a class="nav-link{{ ' active' if title == 'Accepted' else '' }}"
                        href="{{ url_for('friendship.view_accepted') }}"><h5>Accepted</h5></a>
@@ -40,16 +40,25 @@
                                 {{ friendship["friend"]["name"] }}
                             </a>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a type="button" class="btn btn-danger">Delete</a>
+                                {% if friendship["last_changed_by"] != current_user.id and friendship["status"]["name"] == "pending" %}
+                                    <a type="button" class="btn btn-success"
+                                       href="{{ url_for('friendship.accept', friend_id=friendship['friend']['id'], next=request.url) }}">
+                                        Accept
+                                    </a>
+                                {% endif %}
+                                <a type="button" class="btn btn-danger"
+                                   href="{{ url_for('friendship.delete', friend_id=friendship['friend']['id'], next=request.url) }}">
+                                    Delete
+                                </a>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <h1 class="error-message" style="background-color: #ffffff;">You haven't added anyone to the list yet.</h1>
+                <h1 class="content-sub-container small-error-message" style="background-color: #ffffff;">You haven't added anyone to the list yet.</h1>
             {% endif %}
         {% else %}
-            <h1 class="error-message">{{ error_message }}</h1>
+            <h1 class="content-sub-container small-error-message">{{ error_message }}</h1>
         {% endif %}
     </div>
 {% endblock %}
