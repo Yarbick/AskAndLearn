@@ -17,6 +17,7 @@ class Friendship(SerializerMixin, db_manager.declarative_base):
     id = sa.Column("id", sa.Integer, primary_key=True, autoincrement=True)
     user_id = sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False)
     friend_id = sa.Column("friend_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False)
+    last_changed_by = sa.Column("last_changed_by", sa.Integer, nullable=False)
     status_id = sa.Column("status_id", sa.Integer, sa.ForeignKey("friendship_status.id"), nullable=False)
 
     # Связь с моделями
