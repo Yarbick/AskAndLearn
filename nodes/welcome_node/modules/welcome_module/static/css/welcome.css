@@ -1,0 +1,13 @@
+.logo-header {
+    text-align: center;
+    font-size: 120px;
+    text-shadow: 2px 4px 4px rgba(0, 0, 0, 0.5);
+}
+.slogan {
+    text-align: center;
+    font-size: 40px;
+    color: #444444;
+}
+.button-container {
+    padding: 7.5%;
+}
