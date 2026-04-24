@@ -22,7 +22,8 @@ from os import remove as remove_file
 
 # Формы
 from .forms.profile_edit import ProfileEditForm
-from .forms.user_delete import UserDeleteForm
+from .forms.delete import DeleteForm
+from .forms.search import SearchForm
 
 
 @bp.route("/<int:user_id>/profile", methods=["GET"])
@@ -30,15 +31,22 @@ def profile(user_id: int):
     """Профиль пользователя"""
 
     # Получение данных о пользователе
-    server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+    server_address = f"{request.scheme}://{request.host}"
     response = requests.get(f"{server_address}/api/v1/users/{user_id}")
     displayed_user: dict = response.json()["user"] if response else None
+
+    # Получение данных о связи с текущим пользователем
+    if current_user.is_authenticated:
+        response = requests.get(f"{server_address}/api/v1/users/{current_user.id}/friendships/{displayed_user["id"]}")
+        friendship = response.json()["friendship"] if response else None
+    else:
+        friendship = None
 
     # Отображение страницы (GET)
     return render_template(
         "profile.html",
-        current_user=current_user,
-        displayed_user=displayed_user
+        displayed_user=displayed_user,
+        friendship=friendship
     )
 
 
@@ -70,7 +78,7 @@ def profile_edit():
 
         # Изменение данных через REST API
         # Подготовка данных
-        server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+        server_address = f"{request.scheme}://{request.host}"
         request_session: requests.Session = create_csrf_request_session(server_address)
         json_params = {
             "name": profile_edit_form.name.data,
@@ -109,8 +117,7 @@ def profile_edit():
     # Отображение страницы (GET)
     return render_template(
         "profile_edit.html",
-        profile_edit_form=profile_edit_form,
-        current_user=current_user
+        profile_edit_form=profile_edit_form
     )
 
 
@@ -120,7 +127,7 @@ def delete():
     """Удаление пользователя"""
 
     # Форма удаления пользователя
-    delete_form = UserDeleteForm()
+    delete_form = DeleteForm()
 
     # Удаление аккаунта (POST)
     if delete_form.validate_on_submit():
@@ -139,7 +146,7 @@ def delete():
 
         # Удаление пользователя через REST API
         # Подготовка данных
-        server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+        server_address = f"{request.scheme}://{request.host}"
         request_session: requests.Session = create_csrf_request_session(server_address)
         # Запрос
         response: requests.Response = request_session.delete(
@@ -165,9 +172,8 @@ def delete():
 
     # Отображение страницы (GET)
     return render_template(
-        "user_delete.html",
-        delete_form=delete_form,
-        current_user=current_user
+        "delete.html",
+        delete_form=delete_form
     )
 
 
@@ -182,7 +188,7 @@ def delete_icon():
 
     # Удаление названия иконки из БД через REST API
     # Подготовка данных
-    server_address = f"{"https" if request.is_secure else "http"}://{request.host}"
+    server_address = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
     json_params = {
         "icon": ""
@@ -194,5 +200,52 @@ def delete_icon():
         cookies=request.cookies
     )
 
-    # Возвращение к редактированию профиля
-    return redirect(url_for("user.profile_edit"))
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("user.profile_edit"))
+    return redirect(next_url)
+
+
+@bp.route("/search", methods=["GET", "POST"])
+def search():
+    """Поиск пользователей"""
+
+    # Форма для поиска пользователей
+    search_form = SearchForm()
+
+    # Поиск (POST)
+    if search_form.validate_on_submit():
+        # Поиск пользователей через REST API
+        # Подготовка данных
+        server_address = f"{request.scheme}://{request.host}"
+        json_params = {
+            "search": search_form.search.data
+        }
+        # Запрос
+        response = requests.get(
+            f"{server_address}/api/v1/users",
+            json=json_params
+        )
+
+        # Обработка запроса
+        if response:
+            # Получение данных
+            found_users = response.json()["users"]
+
+            # Отображение страницы (POST)
+            return render_template(
+                "search.html",
+                search_form=search_form,
+                found_users=found_users
+            )
+
+        # Отображение страницы в случае ошибки (GET)
+        flash(response.reason, "error")
+        return redirect(
+            "user.search"
+        )
+
+    # Отображение страницы (GET)
+    return render_template(
+        "search.html",
+        search_form=search_form
+    )

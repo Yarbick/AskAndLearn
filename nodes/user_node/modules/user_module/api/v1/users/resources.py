@@ -79,12 +79,20 @@ class UserListResource(Resource):
     """Ресурс списка пользователей"""
 
     def get(self):
+        # Получение данных из парсера
+        filter_params = UserParsers.get_list_parser.parse_args()
+
         # Получение пользователей из БД
         with db_manager.create_session() as db_session:
-            users: list[User] = db_session.query(User).all()
+            if filter_params["search"]:
+                users: list[User] = db_session.query(User).filter(
+                    User.name.ilike(f"%{filter_params["search"]}%") | User.login.ilike(f"%{filter_params["search"]}%")
+                ).all()
+            else:
+                users: list[User] = db_session.query(User).all()
 
         # Вывод результата
-        return jsonify({"users": [user.to_dict(only=["id", "login"]) for user in users]})
+        return jsonify({"users": [user.to_dict(only=["id", "name", "login", "icon"]) for user in users]})
 
     def post(self):
         # Получение данных из парсера

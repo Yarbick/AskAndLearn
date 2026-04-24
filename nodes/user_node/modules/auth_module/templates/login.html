@@ -9,13 +9,6 @@
 {% block content %}
     <div class="auth-container">
         <h1 class="content-header">Login</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning'}}" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endwith %}
         <form action="" method="post">
             {{ login_form.hidden_tag() }}
             <div class="mb-3">

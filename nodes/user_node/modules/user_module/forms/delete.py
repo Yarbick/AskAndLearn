@@ -6,7 +6,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
 
 
-class UserDeleteForm(FlaskForm):
+class DeleteForm(FlaskForm):
     """Форма удаления пользователя"""
 
     # Поля

@@ -15,16 +15,3 @@ def get_csrf_token():
     """Получение CSRF-токена"""
 
     return jsonify({"csrf_token": generate_csrf()})
-
-
-@app.route("/")
-def root():
-    """Временный обработчик для главной страницы"""
-
-    from flask import render_template
-    from flask_login import current_user
-
-    return render_template(
-        "base.html",
-        current_user=current_user
-    )
