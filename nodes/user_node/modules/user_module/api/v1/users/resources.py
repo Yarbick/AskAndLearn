@@ -1,7 +1,8 @@
-"""REST API ресурсы user"""
+"""REST API ресурсы"""
 
 # Работа с фреймворком
 from flask import jsonify, make_response
+
 # Работа с REST API
 from flask_restful import Resource
 
@@ -27,8 +28,8 @@ class UserResource(Resource):
             # Проверки
             UserValidators.is_exists(user)
 
-        # Вывод результата
-        return jsonify({"user": user.to_dict(only=["id", "name", "login", "password", "description", "icon"])})
+            # Вывод результата
+            return jsonify({"user": user.to_dict(only=["id", "name", "login", "password", "description", "icon"])})
 
     def put(self, user_id: int):
         # Получение данных из парсера
@@ -91,8 +92,8 @@ class UserListResource(Resource):
             else:
                 users: list[User] = db_session.query(User).all()
 
-        # Вывод результата
-        return jsonify({"users": [user.to_dict(only=["id", "name", "login", "icon"]) for user in users]})
+            # Вывод результата
+            return jsonify({"users": [user.to_dict(only=["id", "name", "login", "icon"]) for user in users]})
 
     def post(self):
         # Получение данных из парсера

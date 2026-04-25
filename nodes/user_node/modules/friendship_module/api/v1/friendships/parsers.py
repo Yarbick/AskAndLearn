@@ -1,5 +1,4 @@
-"""Парсеры для REST API friendships"""
-from email.policy import default
+"""Парсеры для REST API ресурса"""
 
 # Работа с REST API
 from flask_restful import reqparse

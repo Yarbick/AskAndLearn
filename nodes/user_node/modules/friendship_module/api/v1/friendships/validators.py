@@ -1,4 +1,4 @@
-"""Валидаторы для REST API friendships"""
+"""Валидаторы для REST API ресурса"""
 
 # Работа с фреймворком
 from flask_login import current_user
@@ -36,7 +36,7 @@ class FriendshipAborts:
     def forbidden() -> None:
         """Нет доступа к дружбе"""
 
-        abort(403, error="Access is denied")
+        abort(403, error="Forbidden")
 
     @staticmethod
     def self_confirmation_attempt() -> None:

@@ -1,8 +1,9 @@
-"""REST API ресурсы friendships"""
+"""REST API ресурсы"""
 
 # Работа с фреймворком
 from flask import jsonify, make_response
 from flask_login import current_user
+
 # Работа с REST API
 from flask_restful import Resource
 

@@ -1,4 +1,4 @@
-"""Валидаторы для REST API user"""
+"""Валидаторы для REST API ресурса"""
 
 # Работа с фреймворком
 from flask_login import current_user
