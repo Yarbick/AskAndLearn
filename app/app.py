@@ -32,15 +32,23 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Модули приложения
+# Узел welcome_node
 from nodes.welcome_node.modules.welcome_module import bp as welcome_bp
+# Узел user_node
 from nodes.user_node.modules.auth_module import bp as auth_bp
 from nodes.user_node.modules.user_module import bp as user_bp, api_bp as user_api_bp
 from nodes.user_node.modules.friendship_module import bp as friendship_bp, api_bp as friendship_api_bp
+# Узел qa_node
+from nodes.qa_node.modules.qa_module import bp as qa_bp
 
 # Регистрация модулей
+# Узел welcome_node
 app.register_blueprint(welcome_bp)
+# Узел user_node
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(user_api_bp)
 app.register_blueprint(friendship_bp)
 app.register_blueprint(friendship_api_bp)
+# Узел qa_node
+app.register_blueprint(qa_bp)
