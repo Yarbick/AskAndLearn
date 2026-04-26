@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Profile{% endblock %}
+{% block title %}{{ displayed_user["name"] if displayed_user else "Not found" }}{% endblock %}
 
 {% block styles %}
     <link href="{{ url_for('user.static', filename='css/user.css') }}" type="text/css" rel="stylesheet">

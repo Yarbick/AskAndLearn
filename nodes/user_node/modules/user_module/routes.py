@@ -26,31 +26,33 @@ from .forms.delete import DeleteForm
 from .forms.search import SearchForm
 
 
-@bp.route("/<int:user_id>/profile", methods=["GET"])
+@bp.route("/<int:user_id>/profile/view", methods=["GET"])
 def profile(user_id: int):
     """Профиль пользователя"""
 
-    # Получение данных о пользователе
+    # Получение данных через REST API
     server_address = f"{request.scheme}://{request.host}"
+
+    # Получение данных о пользователе
     response = requests.get(f"{server_address}/api/v1/users/{user_id}")
     displayed_user: dict = response.json()["user"] if response else None
 
     # Получение данных о связи с текущим пользователем
-    if current_user.is_authenticated:
-        response = requests.get(f"{server_address}/api/v1/users/{current_user.id}/friendships/{displayed_user["id"]}")
+    if current_user.is_authenticated and displayed_user:
+        response = requests.get(f"{server_address}/api/v1/users/{current_user.id}/friendships/{user_id}")
         friendship = response.json()["friendship"] if response else None
     else:
         friendship = None
 
     # Отображение страницы (GET)
     return render_template(
-        "profile.html",
+        "profile_view.html",
         displayed_user=displayed_user,
         friendship=friendship
     )
 
 
-@bp.route("/profile_edit", methods=["GET", "POST"])
+@bp.route("/profile/edit", methods=["GET", "POST"])
 @login_required
 def profile_edit():
     """Редактирование профиля пользователя"""
