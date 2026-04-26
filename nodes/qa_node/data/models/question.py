@@ -21,3 +21,11 @@ class Question(SerializerMixin, db_manager.declarative_base):
     creator_id = sa.Column("creator_id", sa.Integer, nullable=True)
     is_solved = sa.Column("is_solved", sa.Boolean, nullable=False)
     is_closed = sa.Column("is_closed", sa.Boolean, nullable=False)
+    image = sa.Column("image", sa.String, nullable=True)
+
+    # Связи с моделями
+    tags = orm.relationship(
+        "Tag",
+        secondary="tag_to_question",
+        back_populates="questions"
+    )

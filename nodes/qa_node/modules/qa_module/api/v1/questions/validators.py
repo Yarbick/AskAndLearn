@@ -16,16 +16,10 @@ class QuestionAborts:
     """Методы для вызова ошибок"""
 
     @staticmethod
-    def question_not_found() -> None:
+    def not_found() -> None:
         """Вопрос не найден"""
 
         abort(404, error="Question not found")
-
-    @staticmethod
-    def creator_not_found() -> None:
-        """Создатель не найден"""
-
-        abort(404, error="Creator not found")
 
     @staticmethod
     def unauthorized() -> None:
@@ -38,6 +32,12 @@ class QuestionAborts:
         """Нет доступа к вопросу"""
 
         abort(403, error="Forbidden")
+
+    @staticmethod
+    def already_exists():
+        """Данный вопрос уже существует у пользователя"""
+
+        abort(400, error="The user already has a question with the given title")
 
 
 class QuestionValidators:
@@ -55,18 +55,5 @@ class QuestionValidators:
 
         # Проверка на авторизацию пользователя
         if not current_user.is_authenticated: QuestionAborts.unauthorized()
-
         # Проверка на доступ к вопросу
         if question.creator_id != current_user.id: QuestionAborts.forbidden()
-
-        # Проверка на существование пользователя через REST API
-        try:
-            # Подготовка данных
-            server_address = f"{request.scheme}://{request.host}/api/v1/users/{question.creator_id}"
-            # Запрос
-            response = requests.get(server_address)
-
-            # Обработка запроса
-            if response.status_code == 404: QuestionAborts.creator_not_found()
-        except:
-            QuestionAborts.creator_not_found()

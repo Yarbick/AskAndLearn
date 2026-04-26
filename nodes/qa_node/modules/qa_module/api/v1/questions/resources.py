@@ -15,6 +15,7 @@ from .validators import QuestionAborts, QuestionValidators
 # Работа с ORM
 from qa_node import db_manager
 from qa_node.data.models.question import Question
+from qa_node.data.models.tag import Tag
 
 
 class QuestionResource(Resource):
@@ -28,13 +29,14 @@ class QuestionResource(Resource):
             QuestionValidators.is_exists(question)
 
             # Вывод результата
-            return jsonify(
-                {"question": question.to_dict(only=["id", "name", "content", "creator_id", "is_solved", "is_closed"])}
-            )
+            return jsonify({"question": question.to_dict(only=[
+                "id", "name", "content", "creator_id", "is_solved", "is_closed", "tags.name", "image"
+            ])})
 
     def put(self, question_id: int):
         # Получение данных из парсера
         question_data: dict = QuestionParsers.put_parser.parse_args()
+        tags: list = question_data.pop("tags", None)
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
@@ -51,6 +53,22 @@ class QuestionResource(Resource):
             # Сохранение изменений
             db_session.commit()
 
+            # Изменение тегов
+            if tags is not None:
+                question.tags.clear()
+                for tag_name in tags:
+                    # Получение тега из БД
+                    tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
+
+                    # Создание тега, если его не существует
+                    if not tag:
+                        tag = Tag(name=tag_name)
+                        db_session.add(tag)
+
+                    # Привязка тега к вопросу
+                    question.tags.append(tag)
+                db_session.commit()
+
             # Вывод результата
             return jsonify({"success": "OK"})
 
@@ -63,8 +81,17 @@ class QuestionResource(Resource):
             QuestionValidators.is_exists(question)
             QuestionValidators.is_available(question)
 
+            # Сохранение тегов для проверки
+            tags_to_check = question.tags.copy()
+
             # Удаление вопроса
             db_session.delete(question)
+            db_session.commit()
+
+            # Удаление тегов, которые не используются в других вопросах
+            for tag in tags_to_check:
+                if not tag.questions:
+                    db_session.delete(tag)
             db_session.commit()
 
             # Вывод результата
@@ -93,9 +120,15 @@ class QuestionListResource(Resource):
     def post(self):
         # Получение данных из парсера
         question_data: dict = QuestionParsers.post_parser.parse_args()
+        tags: list = question_data.pop("tags", None)
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
+            # Проверки
+            if db_session.query(Question).filter(
+                    Question.name == question_data["name"], Question.creator_id == question_data["creator_id"]
+            ).first(): QuestionAborts.already_exists()
+
             # Создание вопроса
             question = Question()
             for field_name, value in question_data.items():
@@ -104,6 +137,21 @@ class QuestionListResource(Resource):
             # Добавление объекта в БД
             db_session.add(question)
             db_session.commit()
+
+            # Добавление тегов
+            if tags is not None:
+                for tag_name in tags:
+                    # Получение тега из БД
+                    tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
+
+                    # Создание тега, если его не существует
+                    if not tag:
+                        tag = Tag(name=tag_name)
+                        db_session.add(tag)
+
+                    # Привязка тега к вопросу
+                    question.tags.append(tag)
+                db_session.commit()
 
             # Вывод результата
             return make_response(jsonify({"id": question.id}), 201)
