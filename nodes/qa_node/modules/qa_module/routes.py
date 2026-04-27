@@ -17,8 +17,19 @@ from .config import Config
 # Работа с REST API
 import requests
 
+# Работа с файлами
+from os import remove as remove_file
+
 # Формы
 from .forms.question_create import QuestionCreateForm
+
+
+@bp.route("/question/home", methods=["GET", "POST"])
+@login_required
+def question_home():
+    """Меню с данными о вопросах пользователя"""
+
+    return ""
 
 
 @bp.route("/question/<int:question_id>/view", methods=["GET"])
@@ -33,7 +44,7 @@ def question_view(question_id: int):
     question = response.json()["question"] if response else None
 
     # Получение данных об авторе вопроса
-    if question["creator_id"]:
+    if question and question["creator_id"]:
         response = requests.get(f"{server_address}/api/v1/users/{question["creator_id"]}")
         question_creator = response.json()["user"] if response else None
     else:
@@ -121,3 +132,70 @@ def question_create():
         "question_create.html",
         question_create_form=question_create_form
     )
+
+
+@bp.route("/question/<int:question_id>/edit", methods=["GET", "POST"])
+@login_required
+def question_edit(question_id: int):
+    """Изменение вопроса"""
+
+    return ""
+
+
+@bp.route("/question/<int:question_id>/delete", methods=["GET", "POST"])
+@login_required
+def question_delete(question_id: int):
+    """Удаление вопроса"""
+
+    # Получение вопроса через REST API
+    # Подготовка данных
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+    # Запрос
+    response: requests.Response = request_session.get(
+        f"{server_address}/api/v1/questions/{question_id}"
+    )
+
+    # Обработка запроса
+    if response:
+        # Получение данных о вопросе
+        question = response.json()["question"]
+
+        # Удаление вопроса через REST API
+        # Запрос
+        response: requests.Response = request_session.delete(
+            f"{server_address}/api/v1/questions/{question_id}",
+            cookies=request.cookies
+        )
+
+        # Обработка запроса
+        if response:
+            # Удаление изображения
+            if question["image"]:
+                remove_file(f"{Config.static_url_path}/questions_images/{question["image"]}")
+
+            # Возвращение на страницу поиска
+            return redirect(url_for("qa.question_search"))
+        else:
+            # Вывод ошибки, если что-то пошло не так
+            try:
+                flash(response.json()["error"], "error")
+            except:
+                flash("Something went wrong", "error")
+    else:
+        # Вывод ошибки, если что-то пошло не так
+        try:
+            flash(response.json()["error"], "error")
+        except:
+            flash("Something went wrong", "error")
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("qa.question_view", question_id=question_id))
+    return redirect(next_url)
+
+
+@bp.route("/question/search", methods=["GET", "POST"])
+def question_search():
+    """Поиск вопросов"""
+
+    return ""

@@ -17,7 +17,7 @@ class Question(SerializerMixin, db_manager.declarative_base):
     # Поля
     id = sa.Column("id", sa.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = sa.Column("name", sa.String, nullable=False)
-    content = sa.Column("content", sa.String, nullable=False)
+    content = sa.Column("content", sa.String, nullable=True)
     creator_id = sa.Column("creator_id", sa.Integer, nullable=True)
     is_solved = sa.Column("is_solved", sa.Boolean, nullable=False)
     is_closed = sa.Column("is_closed", sa.Boolean, nullable=False)

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Create question{% endblock %}
+{% block title %}{{ question["name"] if question else "Not found" }}{% endblock %}
 
 {% block content %}
     {% if question %}
@@ -19,16 +19,18 @@
                     </div>
                     <div class="content-sub-container col">
                         {% if question_creator %}
-                            <a class="user-name" href="{{ url_for('user.profile', user_id=question_creator['id']) }}">
-                                {% if question_creator["icon"] %}
-                                    <img src="{{ url_for('user.static', filename='users_icons/' + question_creator['icon']) }}"
-                                         class="user-icon">
-                                {% else %}
-                                    <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
-                                         class="user-icon">
-                                {% endif %}
-                                {{ question_creator["name"] }}
-                            </a>
+                            <div class="row g-0">
+                                <a class="user-name col-8" href="{{ url_for('user.profile', user_id=question_creator['id']) }}">
+                                    {% if question_creator["icon"] %}
+                                        <img src="{{ url_for('user.static', filename='users_icons/' + question_creator['icon']) }}"
+                                             class="user-icon">
+                                    {% else %}
+                                        <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
+                                             class="user-icon">
+                                    {% endif %}
+                                    {{ question_creator["name"] }}
+                                </a>
+                            </div>
                         {% else %}
                             <h4>Creator not found</h4>
                         {% endif %}
@@ -40,6 +42,11 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
+                        {% if current_user and question_creator and current_user.id == question_creator["id"] %}
+                            <a class="btn btn-secondary col mt-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasQuestionManage" aria-controls="offcanvasExample">
+                                Settings
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
                 {% if question["image"] %}
@@ -48,6 +55,46 @@
             </div>
             <div class="content-container mt-4">
                 Placeholder
+            </div>
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasQuestionManage" aria-labelledby="offcanvasQuestionManageLabel">
+                <div class="offcanvas-header">
+                    <h3 class="offcanvas-title" id="offcanvasQuestionManageLabel">Manage question</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div>
+                        <h4>Editing</h4>
+                        <a type="button" class="btn btn-primary" href="{{ url_for('qa.question_edit', question_id=question['id']) }}">
+                            Edit question
+                        </a>
+                    </div>
+                    <div class="mt-5">
+                        <h4>Deleting</h4>
+                        <div class="alert alert-danger">
+                            <h4 class="alert-heading">Warning!</h4>
+                            This action is irreversible.
+                        </div>
+                        <a type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            Delete question
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Are you sure?</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <a type="button" class="btn btn-danger" href="{{ url_for('qa.question_delete', question_id=question['id']) }}">
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     {% else %}
