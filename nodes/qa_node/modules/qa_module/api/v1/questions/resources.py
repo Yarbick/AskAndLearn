@@ -44,7 +44,7 @@ class QuestionResource(Resource):
             question: Question = db_session.get(Question, question_id)
             # Проверки
             QuestionValidators.is_exists(question)
-            QuestionValidators.is_available(question_data)
+            QuestionValidators.is_available(question)
 
             # Изменение вопроса
             for field_name, value in question_data.items():
@@ -55,7 +55,13 @@ class QuestionResource(Resource):
 
             # Изменение тегов
             if tags is not None:
+                # Сохраняем теги для проверки
+                tags_to_check: list[Tag] = question.tags.copy()
+
+                # Удаление старых тегов
                 question.tags.clear()
+
+                # Создание новых тегов
                 for tag_name in tags:
                     # Получение тега из БД
                     tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
@@ -67,6 +73,12 @@ class QuestionResource(Resource):
 
                     # Привязка тега к вопросу
                     question.tags.append(tag)
+                db_session.commit()
+
+                # Удаление тегов, которые не используются в других вопросах
+                for tag in tags_to_check:
+                    if not tag.questions:
+                        db_session.delete(tag)
                 db_session.commit()
 
             # Вывод результата
@@ -82,7 +94,7 @@ class QuestionResource(Resource):
             QuestionValidators.is_available(question)
 
             # Сохранение тегов для проверки
-            tags_to_check = question.tags.copy()
+            tags_to_check: list[Tag] = question.tags.copy()
 
             # Удаление вопроса
             db_session.delete(question)
