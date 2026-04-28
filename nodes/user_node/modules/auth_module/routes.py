@@ -126,6 +126,10 @@ def logout():
 def change_password():
     """Изменение пароля"""
 
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+
     # Форма для изменения пароля
     change_password_form = ChangePasswordForm()
 
@@ -145,9 +149,6 @@ def change_password():
             return redirect(url_for("auth.change_password"))
 
         # Изменение пароля через REST API
-        # Подготовка данных
-        server_address = f"{request.scheme}://{request.host}"
-        request_session: requests.Session = create_csrf_request_session(server_address)
         json_params = {
             "password": change_password_form.new_password.data
         }
@@ -161,7 +162,7 @@ def change_password():
         # Проверка на успешность выполнения
         if response:
             # Возвращение на страницу редактирования профиля пользователя
-            return redirect(url_for("user.profile_edit"))
+            return redirect(url_for("user.edit"))
         else:
             # Вывод ошибки, если что-то пошло не так
             try:

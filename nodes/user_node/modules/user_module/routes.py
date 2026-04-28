@@ -21,16 +21,16 @@ import requests
 from os import remove as remove_file
 
 # Формы
-from .forms.profile_edit import ProfileEditForm
+from .forms.edit import EditForm
 from .forms.delete import DeleteForm
 from .forms.search import SearchForm
 
 
-@bp.route("/<int:user_id>/profile/view", methods=["GET"])
-def profile(user_id: int):
-    """Профиль пользователя"""
+@bp.route("/<int:user_id>/view", methods=["GET"])
+def view(user_id: int):
+    """Просмотр пользователя"""
 
-    # Получение данных через REST API
+    # Подготовка данных для REST API
     server_address = f"{request.scheme}://{request.host}"
 
     # Получение данных о пользователе
@@ -46,45 +46,49 @@ def profile(user_id: int):
 
     # Отображение страницы (GET)
     return render_template(
-        "profile_view.html",
+        "view.html",
         displayed_user=displayed_user,
         friendship=friendship
     )
 
 
-@bp.route("/profile/edit", methods=["GET", "POST"])
+@bp.route("/edit", methods=["GET", "POST"])
 @login_required
-def profile_edit():
-    """Редактирование профиля пользователя"""
+def edit():
+    """Редактирование пользователя"""
+
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для редактирования профиля
-    profile_edit_form = ProfileEditForm()
+    edit_form = EditForm()
 
     # Процесс редактирования профиля (POST)
-    if profile_edit_form.validate_on_submit():
+    if edit_form.validate_on_submit():
         # Обработка иконки пользователя
-        icon: FileStorage = profile_edit_form.icon.data
+        icon: FileStorage = edit_form.icon.data
         if icon:
             # Проверка на безопасность
-            correct_extensions = profile_edit_form.icon.validators[0].upload_set
+            correct_extensions = edit_form.icon.validators[0].upload_set
             is_safe, reason, secured_filename = Image.full_check(icon.filename, correct_extensions, icon.stream)
 
             if is_safe:
-                # Сохранение файла
+                # Составление имени файла
                 file_extension = secured_filename.split(".")[-1]
                 filename = f"{current_user.id}_{current_user.login}.{file_extension}"
-                icon.save(f"{Config.static_url_path}/users_icons/{filename}")
             else:
                 flash(reason, "error")
-                return redirect(url_for("user.profile_edit"))
+                return redirect(url_for("user.edit"))
+
+        # Сохранение имени файла для проверки
+        icon_filename: str | None = current_user.icon
 
         # Изменение данных через REST API
         # Подготовка данных
-        server_address = f"{request.scheme}://{request.host}"
-        request_session: requests.Session = create_csrf_request_session(server_address)
         json_params = {
-            "name": profile_edit_form.name.data,
-            "description": profile_edit_form.description.data
+            "name": edit_form.name.data,
+            "description": edit_form.description.data
         }
         if icon: json_params["icon"] = filename
         # Запрос
@@ -94,32 +98,33 @@ def profile_edit():
             cookies=request.cookies
         )
 
-        # Проверка на успешность выполнения
+        # Обработка запроса
         if response:
+            if icon:
+                # Удаление иконки
+                if icon_filename:
+                    remove_file(f"{Config.static_url_path}/users_icons/{icon_filename}")
+                # Сохранение новой иконки
+                icon.save(f"{Config.static_url_path}/users_icons/{filename}")
+
             # Возвращение на страницу профиля
-            return redirect(url_for("user.profile", user_id=current_user.id))
+            return redirect(url_for("user.view", user_id=current_user.id))
         else:
             # Вывод ошибки, если что-то пошло не так
             try:
                 flash(response.json()["error"], "error")
             except:
                 flash("Something went wrong", "error")
-            return redirect(url_for("user.profile_edit"))
+            return redirect(url_for("user.edit"))
 
     # Отображение существующих данных пользователя
-    profile_edit_form.name.data = current_user.name
-    profile_edit_form.description.data = current_user.description
-
-    # Проверка на правильное расширение файла (если обнаружила форма)
-    if profile_edit_form.icon.errors:
-        for error in profile_edit_form.icon.errors:
-            flash(error, "error")
-        return redirect(url_for("user.profile_edit"))
+    edit_form.name.data = current_user.name
+    edit_form.description.data = current_user.description
 
     # Отображение страницы (GET)
     return render_template(
-        "profile_edit.html",
-        profile_edit_form=profile_edit_form
+        "edit.html",
+        edit_form=edit_form
     )
 
 
@@ -127,6 +132,10 @@ def profile_edit():
 @login_required
 def delete():
     """Удаление пользователя"""
+
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма удаления пользователя
     delete_form = DeleteForm()
@@ -146,21 +155,21 @@ def delete():
             flash("Confirm the action", "error")
             return redirect(url_for("user.delete"))
 
+        # Сохранение имени файла для проверки
+        icon_filename: str | None = current_user.icon
+
         # Удаление пользователя через REST API
-        # Подготовка данных
-        server_address = f"{request.scheme}://{request.host}"
-        request_session: requests.Session = create_csrf_request_session(server_address)
         # Запрос
         response: requests.Response = request_session.delete(
             f"{server_address}/api/v1/users/{current_user.id}",
             cookies=request.cookies
         )
 
-        # Проверка на успешность выполнения
+        # Обработка запроса
         if response:
             # Удаление иконки
-            if current_user.icon:
-                remove_file(f"{Config.static_url_path}/users_icons/{current_user.icon}")
+            if icon_filename:
+                remove_file(f"{Config.static_url_path}/users_icons/{icon_filename}")
 
             # Выход из аккаунта
             return redirect(url_for("auth.logout"))
@@ -170,7 +179,6 @@ def delete():
                 flash(response.json()["error"], "error")
             except:
                 flash("Something went wrong", "error")
-            return redirect(url_for("user.delete"))
 
     # Отображение страницы (GET)
     return render_template(
@@ -179,31 +187,41 @@ def delete():
     )
 
 
-@bp.route("/profile_edit/delete_icon", methods=["GET"])
+@bp.route("/delete/icon", methods=["GET"])
 @login_required
 def delete_icon():
-    """Удаление иконки"""
+    """Удаление иконки пользователя"""
 
-    # Удаление файла с иконкой
-    if current_user.icon:
-        remove_file(f"{Config.static_url_path}/users_icons/{current_user.icon}")
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление названия иконки из БД через REST API
     # Подготовка данных
-    server_address = f"{request.scheme}://{request.host}"
-    request_session: requests.Session = create_csrf_request_session(server_address)
     json_params = {
         "icon": ""
     }
     # Запрос
-    request_session.put(
+    response = request_session.put(
         f"{server_address}/api/v1/users/{current_user.id}",
         json=json_params,
         cookies=request.cookies
     )
 
+    # Обработка запроса
+    if response:
+        # Удаление иконки
+        if current_user.icon:
+            remove_file(f"{Config.static_url_path}/users_icons/{current_user.icon}")
+    else:
+        # Вывод ошибки, если что-то пошло не так
+        try:
+            flash(response.json()["error"], "error")
+        except:
+            flash("Something went wrong", "error")
+
     # Возвращение на предыдущую страницу
-    next_url: str = request.args.get("next", url_for("user.profile_edit"))
+    next_url: str = request.args.get("next", url_for("user.edit"))
     return redirect(next_url)
 
 
@@ -211,16 +229,28 @@ def delete_icon():
 def search():
     """Поиск пользователей"""
 
-    # Форма для поиска пользователей
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+
+    # Форма для поиска
     search_form = SearchForm()
 
-    # Поиск (POST)
+    # Запрос на поиск через форму (POST)
     if search_form.validate_on_submit():
-        # Поиск пользователей через REST API
+        # Обновление страницы с параметрами для поиска
+        return redirect(url_for(
+            "user.search",
+            search=search_form.search.data,
+            search_mode="name-login"
+        ))
+
+    # Процесс поиска (параметры передаётся через параметры ссылки)
+    if request.args.get("search_mode"):
+        # Поиск вопросов через REST API
         # Подготовка данных
-        server_address = f"{request.scheme}://{request.host}"
         json_params = {
-            "search": search_form.search.data
+            "search": request.args.get("search"),
+            "search_mode": request.args.get("search_mode")
         }
         # Запрос
         response = requests.get(
@@ -233,20 +263,20 @@ def search():
             # Получение данных
             found_users = response.json()["users"]
 
-            # Отображение страницы (POST)
+            # Отображение страницы (GET)
             return render_template(
                 "search.html",
                 search_form=search_form,
                 found_users=found_users
             )
+        else:
+            # Вывод ошибки, если что-то пошло не так
+            try:
+                flash(response.json()["error"], "error")
+            except:
+                flash("Something went wrong", "error")
 
-        # Отображение страницы в случае ошибки (GET)
-        flash(response.reason, "error")
-        return redirect(
-            "user.search"
-        )
-
-    # Отображение страницы (GET)
+    # Отображение страницы без данных для поиска (GET)
     return render_template(
         "search.html",
         search_form=search_form

@@ -15,11 +15,3 @@
     border: 5px solid #cccccc;
     border-radius: 100%;
 }
-.list-user-info {
-    display: flex;
-    text-decoration: none;
-    color: #000000;
-    font-weight: 100%;
-    font-size: 24px;
-    gap: 4px;
-}

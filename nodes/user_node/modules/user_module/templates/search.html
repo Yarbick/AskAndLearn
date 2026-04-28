@@ -9,39 +9,36 @@
 {% block content %}
     <div class="content-container">
         <h1 class="content-header-left">User Search</h1>
-        {% if not error_message and error_message != "" %}
-            <form class="d-flex" method="post" style="margin-bottom: 1%;">
-                {{ search_form.hidden_tag() }}
-                {{ search_form.search(class="form-control me-2", type="search", placeholder="Search") }}
-                {{ search_form.submit(class="btn btn-success", type="submit") }}
-            </form>
-            <div class="content-sub-container">
-                {% if found_users %}
-                    <div class="list-group">
-                        {% for user in found_users %}
-                            {% if user["id"] != current_user.id %}
-                                <div class="list-group-item d-flex justify-content-between align-items-start">
-                                    <a href="{{ url_for('user.profile', user_id=user['id'])}}"
-                                       class="list-user-info">
-                                        {% if user["icon"] %}
-                                            <img src="{{ url_for('user.static', filename='users_icons/' + user['icon']) }}"
-                                                 class="user-icon">
-                                        {% else %}
-                                            <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
-                                                 class="user-icon">
-                                        {% endif %}
-                                        {{ user["name"] }}
-                                    </a>
-                                </div>
-                            {% elif found_users|length == 1 %}
-                                <h1 class="small-error-message">Nothing was found for your query</h1>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <h1 class="small-error-message">Nothing was found for your query</h1>
-                {% endif %}
-            </div>
-        {% endif %}
+        <form class="d-flex" method="post">
+            {{ search_form.hidden_tag() }}
+            {{ search_form.search(class="form-control me-2", type="search", placeholder="Search") }}
+            {{ search_form.submit(class="btn btn-success", type="submit") }}
+        </form>
+        <div class="content-sub-container mt-3">
+            {% if found_users %}
+                <div class="list-group">
+                    {% for user in found_users %}
+                        {% if user["id"] != current_user.id %}
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <a href="{{ url_for('user.view', user_id=user['id'])}}" class="list-item">
+                                    {% if user["icon"] %}
+                                        <img src="{{ url_for('user.static', filename='users_icons/' + user['icon']) }}"
+                                             class="user-icon">
+                                    {% else %}
+                                        <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
+                                             class="user-icon">
+                                    {% endif %}
+                                    {{ user["name"] }}
+                                </a>
+                            </div>
+                        {% elif found_users|length == 1 %}
+                            <h1 class="small-error-message">Nothing was found for your query</h1>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <h1 class="small-error-message">Nothing was found for your query</h1>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

@@ -68,6 +68,10 @@ class UserResource(Resource):
             UserValidators.is_exists(user)
             UserValidators.is_available(user)
 
+            # Удаление связей с другими пользователями
+            for friendship in set(user.friendships_as_user).union(user.friendships_as_friend):
+                db_session.delete(friendship)
+
             # Удаление пользователя
             db_session.delete(user)
             db_session.commit()
@@ -85,11 +89,13 @@ class UserListResource(Resource):
 
         # Получение пользователей из БД
         with db_manager.create_session() as db_session:
-            if filter_params["search"]:
-                users: list[User] = db_session.query(User).filter(
-                    User.name.ilike(f"%{filter_params["search"]}%") | User.login.ilike(f"%{filter_params["search"]}%")
-                ).all()
-            else:
+            if filter_params["search"]:  # С фильтром
+                if not filter_params["search_mode"] or filter_params["search_mode"] == "name-login":  # Фильтр по имени
+                    name_or_login = filter_params["search"]
+                    users: list[User] = db_session.query(User).filter(
+                        User.name.ilike(f"%{name_or_login}%") | User.login.ilike(f"%{name_or_login}%")
+                    ).all()
+            else:  # Без фильтра
                 users: list[User] = db_session.query(User).all()
 
             # Вывод результата

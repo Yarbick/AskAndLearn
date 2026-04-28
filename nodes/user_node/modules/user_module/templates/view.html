@@ -20,7 +20,7 @@
                     {% endif %}
                     <div>
                         <h1 class="profile-user-name">{{ displayed_user["name"] }}</h1>
-                        <a href="{{ url_for('user.profile', user_id=displayed_user['id']) }}" class="profile-user-login">
+                        <a href="{{ url_for('user.view', user_id=displayed_user['id']) }}" class="profile-user-login">
                             {{ displayed_user["login"] }}
                         </a>
                     </div>
@@ -50,7 +50,7 @@
                         </div>
                     {% endif %}
                 </div>
-                <div class="card text-bg-light mb-3" style="margin-top: 2.5%;">
+                <div class="card text-bg-light mt-5">
                     <h3 class="card-header">User description</h3>
                     <div class="card-body">
                         {% if displayed_user["description"] %}
@@ -61,10 +61,10 @@
                     </div>
                 </div>
                 {% if current_user.id == displayed_user["id"] and current_user.password == displayed_user["password"] %}
-                    <div class="d-inline-flex gap-1" style="width: 100%; margin-top: 2.5%;">
+                    <div class="d-inline-flex gap-1 mt-5" style="width: 100%;">
                         <a type="button" class="btn btn-primary" style="width: 33.3%;"
-                           href="{{ url_for('user.profile_edit') }}">
-                            Edit profile
+                           href="{{ url_for('user.edit') }}">
+                            Edit account
                         </a>
                         <a type="button" class="btn btn-danger" style="width: 33.3%;"
                            href="{{ url_for('auth.logout') }}">

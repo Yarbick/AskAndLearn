@@ -11,8 +11,11 @@ from dataclasses import dataclass
 class FriendshipParsers:
     get_list_parser = reqparse.RequestParser()
     get_list_parser.add_argument(
-        "status", type=str, nullable=True, action="append",
+        "search", type=str, nullable=True, action="append",
         choices=("accepted", "pending", "blocked"), default=["accepted", "pending", "blocked"]
+    )
+    get_list_parser.add_argument(
+        "search_mode", type=str, nullable=True, choices=("status",)
     )
 
     post_parser = reqparse.RequestParser()
