@@ -110,11 +110,8 @@ def edit():
             # Возвращение на страницу профиля
             return redirect(url_for("user.view", user_id=current_user.id))
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
             return redirect(url_for("user.edit"))
 
     # Отображение существующих данных пользователя
@@ -174,11 +171,8 @@ def delete():
             # Выход из аккаунта
             return redirect(url_for("auth.logout"))
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
 
     # Отображение страницы (GET)
     return render_template(
@@ -214,11 +208,8 @@ def delete_icon():
         if current_user.icon:
             remove_file(f"{Config.static_url_path}/users_icons/{current_user.icon}")
     else:
-        # Вывод ошибки, если что-то пошло не так
-        try:
-            flash(response.json()["error"], "error")
-        except:
-            flash("Something went wrong", "error")
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("user.edit"))
@@ -270,11 +261,8 @@ def search():
                 found_users=found_users
             )
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
 
     # Отображение страницы без данных для поиска (GET)
     return render_template(

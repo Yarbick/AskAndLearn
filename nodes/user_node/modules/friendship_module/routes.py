@@ -7,6 +7,9 @@ from flask_login import current_user, login_required
 # Безопасность
 from security.csrf import create_csrf_request_session
 
+# Обработка ошибок
+from exceptions.api.rest.shared import ResponseErrorHandler
+
 # Подключение к модулю
 from .blueprint import bp
 
@@ -100,14 +103,11 @@ def accept(friend_id: int):
     )
 
     # Обработка запроса
-    if not response:
-        # Обработка ошибок
-        try:
-            flash(response.json()["error"], "error")
-        except:
-            flash("Something went wrong", "error")
-    else:
+    if response:
         flash("Friend request accepted", "info")
+    else:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("friendship.view_pending", friend_id=friend_id))
@@ -136,14 +136,11 @@ def send_request(friend_id: int):
     )
 
     # Обработка запроса
-    if not response:
-        # Обработка ошибок
-        try:
-            flash(response.json()["error"], "error")
-        except:
-            flash("Something went wrong", "error")
-    else:
+    if response:
         flash("The request has been sent", "info")
+    else:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("user.view", user_id=friend_id))
@@ -172,31 +169,25 @@ def block(friend_id: int):
     )
 
     # Обработка запроса
-    if not response:
-        if response.status_code == 404:
-            # Создание новых отношений с блокировкой
-            # Запрос
-            response: requests.Response = request_session.post(
-                f"{server_address}/api/v1/users/{current_user.id}/friendships",
-                json=json_params
-            )
+    if response:
+        flash("The user is blocked", "info")
+    elif response.status_code == 404:
+        # Создание новых отношений с блокировкой через REST API
+        # Запрос
+        response: requests.Response = request_session.post(
+            f"{server_address}/api/v1/users/{current_user.id}/friendships",
+            json=json_params
+        )
 
-            # Обработка ошибок
-            if not response:
-                try:
-                    flash(response.json()["error"], "error")
-                except:
-                    flash("Something went wrong", "error")
-            else:
-                flash("The user is blocked", "info")
+        # Обработка запроса
+        if response:
+            flash("The user is blocked", "info")
         else:
             # Обработка ошибок
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            ResponseErrorHandler.flash_reason_message(response)
     else:
-        flash("The user is blocked", "info")
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("user.view", user_id=friend_id))
@@ -220,14 +211,11 @@ def delete(friend_id: int):
     )
 
     # Обработка запроса
-    if not response:
-        # Обработка ошибок
-        try:
-            flash(response.json()["error"], "error")
-        except:
-            flash("Something went wrong", "error")
-    else:
+    if response:
         flash("The friendship was successfully deleted", "info")
+    else:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("friendship.view_accepted", friend_id=friend_id))

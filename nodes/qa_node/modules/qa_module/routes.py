@@ -8,6 +8,9 @@ from flask_login import current_user, login_required
 from security.csrf import create_csrf_request_session
 from security.file import Image
 
+# Обработка ошибок
+from exceptions.api.rest.shared import ResponseErrorHandler
+
 # Подключение к модулю
 from .blueprint import bp
 
@@ -113,7 +116,8 @@ def question_create():
         # Обработка запроса
         if response:
             # Сохранение изображения
-            if image: image.save(f"{Config.static_url_path}/questions_images/{filename}")
+            if image:
+                image.save(f"{Config.static_url_path}/questions_images/{filename}")
 
             # Получение ID нового вопроса
             question_id: int = response.json()["id"]
@@ -121,11 +125,8 @@ def question_create():
             # Перенос на страницу с созданным вопросом
             return redirect(url_for("qa.question_view", question_id=question_id))
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
 
     # Отображение страницы (GET)
     return render_template(
@@ -199,12 +200,8 @@ def question_edit(question_id: int):
                 # Перенос на страницу с отредактированным вопросом
                 return redirect(url_for("qa.question_view", question_id=question_id))
             else:
-                # Вывод ошибки, если что-то пошло не так
-                try:
-                    flash(response.json()["error"], "error")
-                except:
-                    flash("Something went wrong", "error")
-                return redirect(url_for("qa.question_edit", question_id=question_id))
+                # Обработка ошибок
+                ResponseErrorHandler.flash_reason_message(response)
         else:
             # Подстановка текущих данных в поля
             question_edit_form.name.data = question["name"]
@@ -217,12 +214,10 @@ def question_edit(question_id: int):
             question_edit_form=question_edit_form,
             question=question
         )
+    else:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
-    # Вывод ошибки, если что-то пошло не так
-    try:
-        flash(response.json()["error"], "error")
-    except:
-        flash("Something went wrong", "error")
     # Возвращение в меню, если вопрос не удалось загрузить
     return redirect(url_for("qa.question_home"))
 
@@ -261,17 +256,11 @@ def question_delete(question_id: int):
             # Возвращение в меню
             return redirect(url_for("qa.question_home"))
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
     else:
-        # Вывод ошибки, если что-то пошло не так
-        try:
-            flash(response.json()["error"], "error")
-        except:
-            flash("Something went wrong", "error")
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("qa.question_view", question_id=question_id))
@@ -314,17 +303,11 @@ def question_delete_image(question_id: int):
                 # Удаление изображения
                 remove_file(f"{Config.static_url_path}/questions_images/{question["image"]}")
             else:
-                # Вывод ошибки, если что-то пошло не так
-                try:
-                    flash(response.json()["error"], "error")
-                except:
-                    flash("Something went wrong", "error")
+                # Обработка ошибок
+                ResponseErrorHandler.flash_reason_message(response)
     else:
-        # Вывод ошибки, если что-то пошло не так
-        try:
-            flash(response.json()["error"], "error")
-        except:
-            flash("Something went wrong", "error")
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("qa.question_edit", question_id=question_id))
@@ -376,12 +359,8 @@ def question_search():
                 found_questions=found_questions
             )
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
-            return redirect(url_for("qa.question_search"))
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
 
     # Отображение страницы без данных для поиска (GET)
     return render_template(

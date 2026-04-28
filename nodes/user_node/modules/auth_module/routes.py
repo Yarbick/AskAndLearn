@@ -10,6 +10,9 @@ from .blueprint import bp
 # Безопасность
 from security.csrf import create_csrf_request_session
 
+# Обработка ошибок
+from exceptions.api.rest.shared import ResponseErrorHandler
+
 # Работа с REST API
 import requests
 
@@ -64,11 +67,8 @@ def register():
             # Переключение на главную страницу
             return redirect("/")
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
             return redirect(url_for("auth.register"))
 
     # Отображение страницы (GET)
@@ -164,11 +164,8 @@ def change_password():
             # Возвращение на страницу редактирования профиля пользователя
             return redirect(url_for("user.edit"))
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
             return redirect(url_for("auth.change_password"))
 
     # Отображение страницы (GET)
