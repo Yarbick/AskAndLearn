@@ -23,6 +23,7 @@ from os import remove as remove_file
 # Формы
 from .forms.question_create import QuestionCreateForm
 from .forms.question_edit import QuestionEditForm
+from .forms.question_search import QuestionSearchForm
 
 
 @bp.route("/question/home", methods=["GET", "POST"])
@@ -125,13 +126,6 @@ def question_create():
                 flash(response.json()["error"], "error")
             except:
                 flash("Something went wrong", "error")
-            return redirect(url_for("qa.question_create"))
-
-    # Проверка на правильное расширение файла (если обнаружила форма)
-    if question_create_form.image.errors:
-        for error in question_create_form.image.errors:
-            flash(error, "error")
-        return redirect(url_for("qa.question_create"))
 
     # Отображение страницы (GET)
     return render_template(
@@ -217,12 +211,6 @@ def question_edit(question_id: int):
             question_edit_form.tags.data = ", ".join([tag["name"] for tag in question["tags"]])
             question_edit_form.content.data = question["content"]
 
-        # Проверка на правильное расширение файла (если обнаружила форма)
-        if question_edit_form.image.errors:
-            for error in question_edit_form.image.errors:
-                flash(error, "error")
-            return redirect(url_for("qa.question_edit", question_id=question_id))
-
         # Отображение страницы (GET)
         return render_template(
             "question_edit.html",
@@ -290,7 +278,7 @@ def question_delete(question_id: int):
     return redirect(next_url)
 
 
-@bp.route("/question/<int:question_id>/delete/image", methods=["GET", "POST"])
+@bp.route("/question/<int:question_id>/delete/image", methods=["GET"])
 @login_required
 def question_delete_image(question_id: int):
     """Удаление изображения вопроса"""
@@ -347,4 +335,56 @@ def question_delete_image(question_id: int):
 def question_search():
     """Поиск вопросов"""
 
-    return ""
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+
+    # Форма для поиска
+    search_form = QuestionSearchForm()
+
+    # Запрос на поиск через форму (POST)
+    if search_form.validate_on_submit():
+        # Обновление страницы с параметрами для поиска
+        return redirect(url_for(
+            "qa.question_search",
+            search=search_form.search.data,
+            search_mode="name"
+        ))
+
+    # Процесс поиска (параметры передаётся через параметры ссылки)
+    if request.args.get("search_mode"):
+        # Поиск вопросов через REST API
+        # Подготовка данных
+        json_params = {
+            "search": request.args.get("search"),
+            "search_mode": request.args.get("search_mode")
+        }
+        # Запрос
+        response = requests.get(
+            f"{server_address}/api/v1/questions",
+            json=json_params
+        )
+
+        # Обработка запроса
+        if response:
+            # Получение данных
+            found_questions = response.json()["questions"]
+
+            # Отображение страницы (GET)
+            return render_template(
+                "question_search.html",
+                search_form=search_form,
+                found_questions=found_questions
+            )
+        else:
+            # Вывод ошибки, если что-то пошло не так
+            try:
+                flash(response.json()["error"], "error")
+            except:
+                flash("Something went wrong", "error")
+            return redirect(url_for("qa.question_search"))
+
+    # Отображение страницы без данных для поиска (GET)
+    return render_template(
+        "question_search.html",
+        search_form=search_form
+    )

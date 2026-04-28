@@ -24,14 +24,14 @@
                         <a class="navbar-brand dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Search</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('user.search') }}">Users</a></li>
-                            <li><a class="dropdown-item" href="#">Questions</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('qa.question_search') }}">Questions</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
             <div class="navbar-nav">
                 {% if current_user and current_user.is_authenticated %}
-                    <a class="navbar-brand" href="{{ url_for('user.profile', user_id=current_user.id) }}">
+                    <a class="navbar-brand" href="{{ url_for('user.view', user_id=current_user.id) }}">
                         {{ current_user.name }}
                         {% if current_user.icon %}
                             <img src="{{ url_for('user.static', filename='users_icons/' + current_user.icon) }}"

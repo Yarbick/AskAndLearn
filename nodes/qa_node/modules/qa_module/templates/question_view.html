@@ -20,7 +20,7 @@
                     <div class="content-sub-container col">
                         {% if question_creator %}
                             <div class="row g-0">
-                                <a class="user-name col-8" href="{{ url_for('user.profile', user_id=question_creator['id']) }}">
+                                <a class="user-name col-8" href="{{ url_for('user.view', user_id=question_creator['id']) }}">
                                     {% if question_creator["icon"] %}
                                         <img src="{{ url_for('user.static', filename='users_icons/' + question_creator['icon']) }}"
                                              class="user-icon">
@@ -38,7 +38,9 @@
                             <h4 class="mt-3">Tags</h4>
                             <div style="line-height: 2.2;">
                                 {% for tag in question["tags"] %}
-                                    <a type="button" class="btn btn-dark btn-sm truncate">{{ tag["name"] }}</a>
+                                    <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('qa.question_search', search=tag['name'], search_mode='tag') }}">
+                                        {{ tag["name"] }}
+                                    </a>
                                 {% endfor %}
                             </div>
                         {% endif %}

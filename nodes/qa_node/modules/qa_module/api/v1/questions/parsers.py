@@ -10,9 +10,8 @@ from dataclasses import dataclass
 @dataclass
 class QuestionParsers:
     get_list_parser = reqparse.RequestParser()
-    get_list_parser.add_argument(
-        "search", type=str, nullable=True
-    )
+    get_list_parser.add_argument("search", type=str, nullable=True)
+    get_list_parser.add_argument("search_mode", type=str, nullable=True, choices=("name", "tag"))
 
     post_parser = reqparse.RequestParser()
     post_parser.add_argument("name", type=str, required=True)

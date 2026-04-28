@@ -119,11 +119,19 @@ class QuestionListResource(Resource):
 
         # Получение вопросов из БД
         with db_manager.create_session() as db_session:
-            if filter_params["search"]:
-                questions: list[Question] = db_session.query(Question).filter(
-                    Question.name.ilike(f"%{filter_params["search"]}%")
-                ).all()
-            else:
+            if filter_params["search"]:  # С фильтром
+                if not filter_params["search_mode"] or filter_params["search_mode"] == "name":  # Фильтр по имени
+                    question_name: str = filter_params["search"]
+                    questions: list[Question] = db_session.query(Question).filter(
+                        Question.name.ilike(f"%{question_name}%")
+                    ).all()
+                elif filter_params["search_mode"] == "tag":  # Фильтр по тегу
+                    # Поиск подходящего тега
+                    tag_name: str = filter_params["search"]
+                    tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
+                    # Получение вопросов из тега
+                    questions: list[Question] = tag.questions
+            else:  # Без фильтра
                 questions: list[Question] = db_session.query(Question).all()
 
             # Вывод результата
