@@ -76,7 +76,7 @@ def edit():
             if is_safe:
                 # Составление имени файла
                 file_extension = secured_filename.split(".")[-1]
-                filename = f"{current_user.id}_{current_user.login}.{file_extension}"
+                filename = Image.full_clearing_filename(f"{current_user.id}_{current_user.login}.{file_extension}")
             else:
                 flash(reason, "error")
                 return redirect(url_for("user.edit"))

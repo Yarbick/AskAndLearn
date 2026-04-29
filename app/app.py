@@ -19,6 +19,10 @@ app = Flask(
 )
 app.config["SECRET_KEY"] = Config.secret_key
 app.config["MAX_CONTENT_LENGTH"] = Config.max_content_length
+app.config["SESSION_COOKIE_NAME"] = Config.session_cookie_name
+app.config["SESSION_COOKIE_HTTPONLY"] = Config.session_cookie_httponly
+app.config["SESSION_COOKIE_SAMESITE"] = Config.session_cookie_samesite
+app.config["SESSION_REFRESH_EACH_REQUEST"] = Config.session_refresh_each_request
 app.config["PERMANENT_SESSION_LIFETIME"] = Config.permanent_session_lifetime
 app.config['WTF_CSRF_ENABLED'] = Config.wtf_csrf_enabled
 app.config['WTF_CSRF_CHECK_DEFAULT'] = Config.wtf_csrf_check_default

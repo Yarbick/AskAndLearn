@@ -1,7 +1,7 @@
 """Обработчики маршрутов модуля QA"""
 
 # Работа с фреймворком
-from flask import render_template, url_for, redirect, request, flash
+from flask import render_template, url_for, redirect, request, flash, session as flask_session
 from flask_login import current_user, login_required
 
 # Безопасность
@@ -29,19 +29,70 @@ from .forms.question_edit import QuestionEditForm
 from .forms.question_search import QuestionSearchForm
 
 
-@bp.route("/question/home", methods=["GET", "POST"])
+@bp.route("", methods=["GET"])
 @login_required
-def question_home():
-    """Меню с данными о вопросах пользователя"""
+def home():
+    """Главное меню модуля"""
 
-    return ""
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+
+    # Получение новейших вопросов через REST API
+    # Подготовка данных
+    json_params = {
+        "limit": 5
+    }
+    # Запрос
+    response: requests.Response = requests.get(
+        f"{server_address}/api/v1/questions",
+        json=json_params
+    )
+
+    # Обработка запроса
+    newest_questions: list = response.json()["questions"] if response else []
+
+    # Получение последних посещённых запросов из cookie-сессий
+    last_questions: list = []
+    last_questions_ids: list = flask_session.get("last_questions", [])
+    for question_id in last_questions_ids:
+        # Получение вопроса через REST API
+        # Запрос
+        response: requests.Response = requests.get(f"{server_address}/api/v1/questions/{question_id}")
+
+        # Обработка запроса
+        if response:
+            # Добавление вопроса в список
+            question = response.json()["question"]
+            last_questions.append(question)
+
+    # Получение вопросов, созданных пользователем, через REST API
+    # Подготовка данных
+    json_params = {
+        "search": int(current_user.id),
+        "search_mode": "creator"
+    }
+    # Запрос
+    response: requests.Response = requests.get(
+        f"{server_address}/api/v1/questions",
+        json=json_params
+    )
+
+    # Обработка запроса
+    your_questions: list = response.json()["questions"] if response else []
+
+    return render_template(
+        "home.html",
+        newest_questions=newest_questions,
+        last_questions=last_questions,
+        your_questions=your_questions
+    )
 
 
 @bp.route("/question/<int:question_id>/view", methods=["GET"])
 def question_view(question_id: int):
     """Просмотр вопроса"""
 
-    # Получение данных через REST API
+    # Подготовка данных для REST API
     server_address = f"{request.scheme}://{request.host}"
 
     # Получение данных о вопросе через REST API
@@ -49,7 +100,23 @@ def question_view(question_id: int):
     response = requests.get(f"{server_address}/api/v1/questions/{question_id}")
 
     # Обработка запроса
-    question = response.json()["question"] if response else None
+    if response:
+        question = response.json()["question"]
+
+        # Запись посещения вопроса в сессию
+        # Получение cookie-сессии последних вопросов
+        if not flask_session.get("last_questions", None):  # Создаём список, если сессии не существует
+            flask_session["last_questions"] = []
+        last_question: list = flask_session["last_questions"]
+
+        # Добавление вопроса в список
+        if question_id not in last_question:  # Если не существует, то просто добавляем
+            flask_session["last_questions"] = ([question_id] + last_question)[:5]
+        else:  # Если существует, то удаляем старое посещение и добавляем новое
+            ind = last_question.index(question_id)
+            flask_session["last_questions"] = ([question_id] + last_question[:ind] + last_question[ind + 1:])[:5]
+    else:
+        question = None
 
     # Получение данных об авторе вопроса
     if question and question["creator_id"]:
@@ -90,7 +157,9 @@ def question_create():
             if is_safe:
                 # Составление имени файла
                 file_extension = secured_filename.split(".")[-1]
-                filename = f"{current_user.id}_{current_user.login}_{question_create_form.name.data}.{file_extension}"
+                filename = Image.full_clearing_filename(
+                    f"{current_user.id}_{current_user.login}_{question_create_form.name.data}.{file_extension}"
+                )
             else:
                 flash(reason, "error")
                 return redirect(url_for("qa.question_create"))
@@ -168,7 +237,9 @@ def question_edit(question_id: int):
                 if is_safe:
                     # Составление имени файла
                     file_extension = secured_filename.split(".")[-1]
-                    filename = f"{current_user.id}_{current_user.login}_{question_edit_form.name.data}.{file_extension}"
+                    filename = Image.full_clearing_filename(
+                        f"{current_user.id}_{current_user.login}_{question_edit_form.name.data}.{file_extension}"
+                    )
                 else:
                     flash(reason, "error")
                     return redirect(url_for("qa.question_edit", question_id=question_id))
@@ -219,7 +290,7 @@ def question_edit(question_id: int):
         ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение в меню, если вопрос не удалось загрузить
-    return redirect(url_for("qa.question_home"))
+    return redirect(url_for("qa.home"))
 
 
 @bp.route("/question/<int:question_id>/delete", methods=["GET", "POST"])
@@ -254,7 +325,7 @@ def question_delete(question_id: int):
                 remove_file(f"{Config.static_url_path}/questions_images/{question["image"]}")
 
             # Возвращение в меню
-            return redirect(url_for("qa.question_home"))
+            return redirect(url_for("qa.home"))
         else:
             # Обработка ошибок
             ResponseErrorHandler.flash_reason_message(response)

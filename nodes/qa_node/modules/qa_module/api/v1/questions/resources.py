@@ -13,6 +13,8 @@ from .parsers import QuestionParsers
 from .validators import QuestionAborts, QuestionValidators
 
 # Работа с ORM
+from sqlalchemy import desc as sa_desc
+import sqlalchemy.orm as orm
 from qa_node import db_manager
 from qa_node.data.models.question import Question
 from qa_node.data.models.tag import Tag
@@ -114,25 +116,51 @@ class QuestionListResource(Resource):
     """Ресурс списка вопросов"""
 
     def get(self):
+        def get_by_limit(query: orm.Query[Question.id], limit: int | None):
+            """Получение вопросов с учётом лимита"""
+
+            if limit is not None:
+                return query.order_by(sa_desc(Question.id)).limit(limit).all()
+            return query.all()
+
         # Получение данных из парсера
-        filter_params = QuestionParsers.get_list_parser.parse_args()
+        params = QuestionParsers.get_list_parser.parse_args()
+        limit = params["limit"]
 
         # Получение вопросов из БД
         with db_manager.create_session() as db_session:
-            if filter_params["search"]:  # С фильтром
-                if not filter_params["search_mode"] or filter_params["search_mode"] == "name":  # Фильтр по имени
-                    question_name: str = filter_params["search"]
-                    questions: list[Question] = db_session.query(Question).filter(
+            if params["search"]:  # С фильтром
+                if not params["search_mode"] or params["search_mode"] == "name":  # Фильтр по имени
+                    question_name: str = params["search"]
+                    query: orm.Query[Question] = db_session.query(Question).filter(
                         Question.name.ilike(f"%{question_name}%")
-                    ).all()
-                elif filter_params["search_mode"] == "tag":  # Фильтр по тегу
+                    )
+
+                    # Получение вопросов с учётом лимита
+                    questions: list[Question] = get_by_limit(query, limit)
+                elif params["search_mode"] == "tag":  # Фильтр по тегу
                     # Поиск подходящего тега
-                    tag_name: str = filter_params["search"]
+                    tag_name: str = params["search"]
                     tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
-                    # Получение вопросов из тега
-                    questions: list[Question] = tag.questions
+
+                    if tag:
+                        # Получение вопросов с учётом лимита
+                        questions: list[Question] = tag.questions if limit is None else tag.questions[:limit]
+                    else:
+                        questions: list = []
+                elif params["search_mode"] == "creator":  # Фильтр по создателю
+                    creator_id: int = int(params["search"])
+                    query: orm.Query[Question] = db_session.query(Question).filter(
+                        Question.creator_id == creator_id
+                    )
+
+                    # Получение вопросов с учётом лимита
+                    questions: list[Question] = get_by_limit(query, limit)
             else:  # Без фильтра
-                questions: list[Question] = db_session.query(Question).all()
+                query: orm.Query[Question] = db_session.query(Question)
+
+                # Получение вопросов с учётом лимита
+                questions: list[Question] = get_by_limit(query, limit)
 
             # Вывод результата
             return jsonify({"questions": [question.to_dict(only=["id", "name"]) for question in questions]})

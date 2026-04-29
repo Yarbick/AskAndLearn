@@ -1,7 +1,7 @@
 """Обработчики маршрутов модуля Auth"""
 
 # Работа с фреймворком
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, session as flask_session
 from flask_login import login_required, login_user, logout_user, current_user
 
 # Подключение к модулю
@@ -115,8 +115,12 @@ def login():
 def logout():
     """Выход из аккаунта"""
 
+    # Удаление cookie-сессий
+    flask_session.clear()
+
     # Выход из аккаунта
     logout_user()
+
     # Переключение на главную страницу
     return redirect("/")
 
