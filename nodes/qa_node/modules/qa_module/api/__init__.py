@@ -7,11 +7,11 @@ from flask import Blueprint
 from flask_restful import Api
 
 # Ресурсы
-from .v1.friendships.resources import FriendshipResource, FriendshipListResource
+from .v1.questions.resources import QuestionResource, QuestionListResource
 
 # Создание и настройка Blueprint для API
 api_bp = Blueprint(
-    f"friendship_api",
+    f"qa_api",
     __name__,
     url_prefix="/api"
 )
@@ -20,6 +20,6 @@ api_bp = Blueprint(
 api = Api(api_bp)
 
 # Добавление ресурсов
-# Ресурсы friendships
-api.add_resource(FriendshipResource, f"/v1/users/<int:user_id>/friendships/<int:friend_id>")
-api.add_resource(FriendshipListResource, f"/v1/users/<int:user_id>/friendships")
+# Ресурсы questions
+api.add_resource(QuestionResource, f"/v1/questions/<int:question_id>")
+api.add_resource(QuestionListResource, f"/v1/questions")

@@ -18,10 +18,15 @@
     font-size: 40px;
     margin-bottom: 2.5%;
 }
-.content-header-left {
+.content-sub-header {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 1%;
+}
+.content-sub-header-left {
     text-align: left;
-    font-size: 40px;
-    margin-bottom: 2.5%;
+    font-size: 32px;
+    margin-bottom: 1%;
 }
 .user-icon {
     width: 40px;
@@ -29,13 +34,18 @@
     border: 2px solid #cccccc;
     border-radius: 100%;
 }
+.user-name {
+    text-decoration: None;
+    color: #000000;
+    font-size: 22px;
+}
 .error-message {
     font-size: 50px;
     text-align: center;
     padding: 25%;
 }
 .small-error-message {
-    font-size: 50px;
+    font-size: 36px;
     text-align: center;
     padding: 10%;
 }
@@ -44,4 +54,21 @@
     padding-bottom: 2.5%;
     padding-right: 25%;
     padding-left: 25%;
+}
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+.footer {
+    margin-top: 5%;
+}
+.list-item {
+    display: flex;
+    text-decoration: none;
+    color: #000000;
+    font-weight: 100%;
+    font-size: 24px;
+    gap: 4px;
 }

@@ -1,7 +1,8 @@
-"""REST API ресурсы user"""
+"""REST API ресурсы"""
 
 # Работа с фреймворком
 from flask import jsonify, make_response
+
 # Работа с REST API
 from flask_restful import Resource
 
@@ -27,8 +28,8 @@ class UserResource(Resource):
             # Проверки
             UserValidators.is_exists(user)
 
-        # Вывод результата
-        return jsonify({"user": user.to_dict(only=["id", "name", "login", "password", "description", "icon"])})
+            # Вывод результата
+            return jsonify({"user": user.to_dict(only=["id", "name", "login", "password", "description", "icon"])})
 
     def put(self, user_id: int):
         # Получение данных из парсера
@@ -67,6 +68,10 @@ class UserResource(Resource):
             UserValidators.is_exists(user)
             UserValidators.is_available(user)
 
+            # Удаление связей с другими пользователями
+            for friendship in set(user.friendships_as_user).union(user.friendships_as_friend):
+                db_session.delete(friendship)
+
             # Удаление пользователя
             db_session.delete(user)
             db_session.commit()
@@ -84,15 +89,17 @@ class UserListResource(Resource):
 
         # Получение пользователей из БД
         with db_manager.create_session() as db_session:
-            if filter_params["search"]:
-                users: list[User] = db_session.query(User).filter(
-                    User.name.ilike(f"%{filter_params["search"]}%") | User.login.ilike(f"%{filter_params["search"]}%")
-                ).all()
-            else:
+            if filter_params["search"]:  # С фильтром
+                if not filter_params["search_mode"] or filter_params["search_mode"] == "name-login":  # Фильтр по имени
+                    name_or_login = filter_params["search"]
+                    users: list[User] = db_session.query(User).filter(
+                        User.name.ilike(f"%{name_or_login}%") | User.login.ilike(f"%{name_or_login}%")
+                    ).all()
+            else:  # Без фильтра
                 users: list[User] = db_session.query(User).all()
 
-        # Вывод результата
-        return jsonify({"users": [user.to_dict(only=["id", "name", "login", "icon"]) for user in users]})
+            # Вывод результата
+            return jsonify({"users": [user.to_dict(only=["id", "name", "login", "icon"]) for user in users]})
 
     def post(self):
         # Получение данных из парсера

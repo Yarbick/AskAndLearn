@@ -1,4 +1,4 @@
-"""Инициализация API users"""
+"""Инициализация API модуля"""
 
 # Работа с фреймворком
 from flask import Blueprint
@@ -18,6 +18,8 @@ api_bp = Blueprint(
 
 # Создание и настройка API
 api = Api(api_bp)
+
 # Добавление ресурсов
+# Ресурсы users
 api.add_resource(UserResource, f"/v1/users/<int:user_id>")
 api.add_resource(UserListResource, f"/v1/users")

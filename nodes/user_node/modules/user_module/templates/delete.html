@@ -32,7 +32,7 @@
             <div class="d-inline-flex gap-1" style="width: 100%">
                 {{ delete_form.submit(type="submit", class="btn btn-danger", align="center", style="width: 50%;") }}
                 <a type="button" class="btn btn-success" style="width: 50%;"
-                   href="{{ url_for('user.profile', user_id=current_user.id) }}">
+                   href="{{ url_for('user.view', user_id=current_user.id) }}">
                     Back
                 </a>
             </div>

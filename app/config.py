@@ -31,4 +31,8 @@ class Config:
     wtf_csrf_enabled = True
     wtf_csrf_check_default = True
     wtf_csrf_headers = ['X-CSRFToken']
+    session_cookie_name = "main_session"
+    session_cookie_httponly = True
+    session_cookie_samesite = 'Lax'
+    session_refresh_each_request = True
     permanent_session_lifetime = timedelta(days=7)

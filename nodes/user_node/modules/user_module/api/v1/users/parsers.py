@@ -1,4 +1,4 @@
-"""Парсеры для REST API user"""
+"""Парсеры для REST API ресурса"""
 
 # Работа с REST API
 from flask_restful import reqparse
@@ -10,9 +10,8 @@ from dataclasses import dataclass
 @dataclass
 class UserParsers:
     get_list_parser = reqparse.RequestParser()
-    get_list_parser.add_argument(
-        "search", type=str, nullable=True
-    )
+    get_list_parser.add_argument("search", type=str, nullable=True)
+    get_list_parser.add_argument("search_mode", type=str, nullable=True, choices=("name-login",))
 
     post_parser = reqparse.RequestParser()
     post_parser.add_argument("name", type=str, required=True)

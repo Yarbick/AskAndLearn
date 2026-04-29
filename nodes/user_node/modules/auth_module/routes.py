@@ -1,7 +1,7 @@
 """Обработчики маршрутов модуля Auth"""
 
 # Работа с фреймворком
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, session as flask_session
 from flask_login import login_required, login_user, logout_user, current_user
 
 # Подключение к модулю
@@ -9,6 +9,9 @@ from .blueprint import bp
 
 # Безопасность
 from security.csrf import create_csrf_request_session
+
+# Обработка ошибок
+from exceptions.api.rest.shared import ResponseErrorHandler
 
 # Работа с REST API
 import requests
@@ -64,11 +67,8 @@ def register():
             # Переключение на главную страницу
             return redirect("/")
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
             return redirect(url_for("auth.register"))
 
     # Отображение страницы (GET)
@@ -115,8 +115,12 @@ def login():
 def logout():
     """Выход из аккаунта"""
 
+    # Удаление cookie-сессий
+    flask_session.clear()
+
     # Выход из аккаунта
     logout_user()
+
     # Переключение на главную страницу
     return redirect("/")
 
@@ -125,6 +129,10 @@ def logout():
 @login_required
 def change_password():
     """Изменение пароля"""
+
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для изменения пароля
     change_password_form = ChangePasswordForm()
@@ -145,9 +153,6 @@ def change_password():
             return redirect(url_for("auth.change_password"))
 
         # Изменение пароля через REST API
-        # Подготовка данных
-        server_address = f"{request.scheme}://{request.host}"
-        request_session: requests.Session = create_csrf_request_session(server_address)
         json_params = {
             "password": change_password_form.new_password.data
         }
@@ -161,13 +166,10 @@ def change_password():
         # Проверка на успешность выполнения
         if response:
             # Возвращение на страницу редактирования профиля пользователя
-            return redirect(url_for("user.profile_edit"))
+            return redirect(url_for("user.edit"))
         else:
-            # Вывод ошибки, если что-то пошло не так
-            try:
-                flash(response.json()["error"], "error")
-            except:
-                flash("Something went wrong", "error")
+            # Обработка ошибок
+            ResponseErrorHandler.flash_reason_message(response)
             return redirect(url_for("auth.change_password"))
 
     # Отображение страницы (GET)

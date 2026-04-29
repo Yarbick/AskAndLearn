@@ -1,4 +1,4 @@
-"""Форма редактирования профиля"""
+"""Форма редактирования пользователя"""
 
 # Работа с формами
 from flask_wtf import FlaskForm
@@ -7,8 +7,8 @@ from wtforms import StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired
 
 
-class ProfileEditForm(FlaskForm):
-    """Форма редактирования профиля"""
+class EditForm(FlaskForm):
+    """Форма редактирования пользователя"""
 
     # Поля
     name = StringField("Name", validators=[DataRequired()])

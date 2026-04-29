@@ -19,6 +19,10 @@ app = Flask(
 )
 app.config["SECRET_KEY"] = Config.secret_key
 app.config["MAX_CONTENT_LENGTH"] = Config.max_content_length
+app.config["SESSION_COOKIE_NAME"] = Config.session_cookie_name
+app.config["SESSION_COOKIE_HTTPONLY"] = Config.session_cookie_httponly
+app.config["SESSION_COOKIE_SAMESITE"] = Config.session_cookie_samesite
+app.config["SESSION_REFRESH_EACH_REQUEST"] = Config.session_refresh_each_request
 app.config["PERMANENT_SESSION_LIFETIME"] = Config.permanent_session_lifetime
 app.config['WTF_CSRF_ENABLED'] = Config.wtf_csrf_enabled
 app.config['WTF_CSRF_CHECK_DEFAULT'] = Config.wtf_csrf_check_default
@@ -32,15 +36,24 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Модули приложения
+# Узел welcome_node
 from nodes.welcome_node.modules.welcome_module import bp as welcome_bp
+# Узел user_node
 from nodes.user_node.modules.auth_module import bp as auth_bp
 from nodes.user_node.modules.user_module import bp as user_bp, api_bp as user_api_bp
 from nodes.user_node.modules.friendship_module import bp as friendship_bp, api_bp as friendship_api_bp
+# Узел qa_node
+from nodes.qa_node.modules.qa_module import bp as qa_bp, api_bp as qa_api_bp
 
 # Регистрация модулей
+# Узел welcome_node
 app.register_blueprint(welcome_bp)
+# Узел user_node
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(user_api_bp)
 app.register_blueprint(friendship_bp)
 app.register_blueprint(friendship_api_bp)
+# Узел qa_node
+app.register_blueprint(qa_bp)
+app.register_blueprint(qa_api_bp)

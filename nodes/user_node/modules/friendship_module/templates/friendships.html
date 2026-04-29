@@ -10,7 +10,7 @@
     <div class="content-container">
         <h1 class="content-header-primary">{{ title }}</h1>
         {% if not error_message and error_message != "" %}
-            <ul class="nav nav-tabs" style="margin-left: 10px; margin-right: 10px;">
+            <ul class="nav nav-tabs mt-4" style="margin-left: 10px; margin-right: 10px;">
                 <li class="nav-item">
                     <a class="nav-link{{ ' active' if title == 'Accepted' else '' }}"
                        href="{{ url_for('friendship.view_accepted') }}"><h5>Accepted</h5></a>
@@ -28,7 +28,7 @@
                 <div class="list-group">
                     {% for friendship in user_friendships %}
                         <div class="list-group-item d-flex justify-content-between align-items-start">
-                            <a href="{{ url_for('user.profile', user_id=friendship['friend']['id'])}}"
+                            <a href="{{ url_for('user.view', user_id=friendship['friend']['id'])}}"
                                class="friend-info">
                                 {% if friendship["friend"]["icon"] %}
                                     <img src="{{ url_for('user.static', filename='users_icons/' + friendship['friend']['icon']) }}"

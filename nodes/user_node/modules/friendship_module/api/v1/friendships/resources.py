@@ -1,8 +1,9 @@
-"""REST API ресурсы friendships"""
+"""REST API ресурсы"""
 
 # Работа с фреймворком
 from flask import jsonify, make_response
 from flask_login import current_user
+
 # Работа с REST API
 from flask_restful import Resource
 
@@ -98,11 +99,19 @@ class FriendshipListResource(Resource):
 
         # Получение дружб из БД
         with db_manager.create_session() as db_session:
-            friendships: list[Friendship] = db_session.query(Friendship).join(Friendship.status).filter(
-                Friendship.user_id == user_id,
-                FriendshipStatus.name.in_(filter_params["status"]),
-                sa.not_((FriendshipStatus.name == "blocked") & (Friendship.last_changed_by != user_id))
-            ).all()
+            if filter_params["search"]:  # С фильтром
+                if not filter_params["search_mode"] or filter_params["search_mode"] == "status":  # Фильтр по статусу
+                    status: str = filter_params["search"]
+                    friendships: list[Friendship] = db_session.query(Friendship).join(Friendship.status).filter(
+                        Friendship.user_id == user_id,
+                        FriendshipStatus.name.in_(status),
+                        sa.not_((FriendshipStatus.name == "blocked") & (Friendship.last_changed_by != user_id))
+                    ).all()
+            else:  # Без фильтра
+                friendships: list[Friendship] = db_session.query(Friendship).join(Friendship.status).filter(
+                    Friendship.user_id == user_id,
+                    sa.not_((FriendshipStatus.name == "blocked") & (Friendship.last_changed_by != user_id))
+                ).all()
 
             # Вывод результата
             return jsonify({"friendships": [friendship.to_dict(only=[
