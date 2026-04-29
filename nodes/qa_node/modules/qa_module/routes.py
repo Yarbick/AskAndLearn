@@ -115,6 +115,7 @@ def question_view(question_id: int):
         else:  # Если существует, то удаляем старое посещение и добавляем новое
             ind = last_question.index(question_id)
             flask_session["last_questions"] = ([question_id] + last_question[:ind] + last_question[ind + 1:])[:5]
+        flask_session.permanent = True
     else:
         question = None
 
@@ -382,6 +383,68 @@ def question_delete_image(question_id: int):
 
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("qa.question_edit", question_id=question_id))
+    return redirect(next_url)
+
+
+@bp.route("/question/<int:question_id>/solved/<string:solved_status>", methods=["GET"])
+@login_required
+def question_set_solved(question_id: int, solved_status: str):
+    """Изменение состояния is_solved"""
+
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+
+    # Изменение состояния is_solved через REST API
+    # Подготовка данных
+    json_params = {
+        "is_solved": solved_status == "true"
+    }
+    # Запрос
+    response: requests.Response = request_session.put(
+        f"{server_address}/api/v1/questions/{question_id}",
+        json=json_params,
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if not response:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("qa.question_view", question_id=question_id))
+    return redirect(next_url)
+
+
+@bp.route("/question/<int:question_id>/closed/<string:closed_status>", methods=["GET"])
+@login_required
+def question_set_closed(question_id: int, closed_status: str):
+    """Изменение состояния is_closed"""
+
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+
+    # Изменение состояния is_closed через REST API
+    # Подготовка данных
+    json_params = {
+        "is_closed": closed_status == "true"
+    }
+    # Запрос
+    response: requests.Response = request_session.put(
+        f"{server_address}/api/v1/questions/{question_id}",
+        json=json_params,
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if not response:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("qa.question_view", question_id=question_id))
     return redirect(next_url)
 
 

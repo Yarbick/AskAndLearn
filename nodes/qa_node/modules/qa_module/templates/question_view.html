@@ -6,6 +6,18 @@
     {% if question %}
         <div>
             <div class="content-container">
+                <div>
+                    {% if question["is_solved"] %}
+                        <div class="alert alert-success" role="alert">
+                            The question was solved
+                        </div>
+                    {% endif %}
+                    {% if question["is_closed"] %}
+                        <div class="alert alert-danger" role="alert">
+                            The question was closed
+                        </div>
+                    {% endif %}
+                </div>
                 <div class="row g-0 gap-4">
                     <div class="card text-bg-light col-9">
                         <h2 class="card-header">{{ question["name"] }}</h2>
@@ -45,9 +57,11 @@
                             </div>
                         {% endif %}
                         {% if current_user and question_creator and current_user.id == question_creator["id"] %}
-                            <a class="btn btn-secondary col mt-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasQuestionManage" aria-controls="offcanvasExample">
-                                Settings
-                            </a>
+                            <div class="mt-4">
+                                <a class="btn btn-secondary col" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasQuestionManage" aria-controls="offcanvasExample">
+                                    Settings
+                                </a>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -66,9 +80,29 @@
                 <div class="offcanvas-body">
                     <div>
                         <h4>Editing</h4>
-                        <a type="button" class="btn btn-primary" href="{{ url_for('qa.question_edit', question_id=question['id']) }}">
-                            Edit question
-                        </a>
+                        <div>
+                            <a type="button" class="btn btn-primary" href="{{ url_for('qa.question_edit', question_id=question['id']) }}">
+                                Edit question
+                            </a>
+                            {% if question["is_solved"] %}
+                                <a type="button" class="btn btn-danger" href="{{ url_for('qa.question_set_solved', question_id=question['id'], solved_status='false') }}">
+                                    Set unsolved
+                                </a>
+                            {% else %}
+                                <a type="button" class="btn btn-success" href="{{ url_for('qa.question_set_solved', question_id=question['id'], solved_status='true') }}">
+                                    Set solved
+                                </a>
+                            {% endif %}
+                            {% if question["is_closed"] %}
+                                <a type="button" class="btn btn-success" href="{{ url_for('qa.question_set_closed', question_id=question['id'], closed_status='false') }}">
+                                    Open
+                                </a>
+                            {% else %}
+                                <a type="button" class="btn btn-danger" href="{{ url_for('qa.question_set_closed', question_id=question['id'], closed_status='true') }}">
+                                    Close
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="mt-5">
                         <h4>Deleting</h4>
@@ -76,9 +110,11 @@
                             <h4 class="alert-heading">Warning!</h4>
                             This action is irreversible.
                         </div>
-                        <a type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                            Delete question
-                        </a>
+                        <div>
+                            <a type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                Delete question
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
