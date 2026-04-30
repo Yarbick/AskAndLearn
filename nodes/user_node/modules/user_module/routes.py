@@ -46,7 +46,7 @@ def view(user_id: int):
 
     # Отображение страницы (GET)
     return render_template(
-        "view.html",
+        "user/view.html",
         displayed_user=displayed_user,
         friendship=friendship
     )
@@ -120,7 +120,7 @@ def edit():
 
     # Отображение страницы (GET)
     return render_template(
-        "edit.html",
+        "user/edit.html",
         edit_form=edit_form
     )
 
@@ -176,7 +176,7 @@ def delete():
 
     # Отображение страницы (GET)
     return render_template(
-        "delete.html",
+        "user/delete.html",
         delete_form=delete_form
     )
 
@@ -256,7 +256,7 @@ def search():
 
             # Отображение страницы (GET)
             return render_template(
-                "search.html",
+                "user/search.html",
                 search_form=search_form,
                 found_users=found_users
             )
@@ -266,6 +266,6 @@ def search():
 
     # Отображение страницы без данных для поиска (GET)
     return render_template(
-        "search.html",
+        "user/search.html",
         search_form=search_form
     )

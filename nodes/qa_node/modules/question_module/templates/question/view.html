@@ -50,7 +50,7 @@
                             <h4 class="mt-3">Tags</h4>
                             <div style="line-height: 2.2;">
                                 {% for tag in question["tags"] %}
-                                    <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('qa.question_search', search=tag['name'], search_mode='tag') }}">
+                                    <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
                                         {{ tag["name"] }}
                                     </a>
                                 {% endfor %}
@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 {% if question["image"] %}
-                    <img src="{{ url_for('qa.static', filename='questions_images/' + question['image']) }}" class="img-thumbnail mt-3" alt="Download error">
+                    <img src="{{ url_for('question.static', filename='questions_images/' + question['image']) }}" class="img-thumbnail mt-3" alt="Download error">
                 {% endif %}
             </div>
             <div class="content-container mt-4">
@@ -81,24 +81,24 @@
                     <div>
                         <h4>Editing</h4>
                         <div>
-                            <a type="button" class="btn btn-primary" href="{{ url_for('qa.question_edit', question_id=question['id']) }}">
+                            <a type="button" class="btn btn-primary" href="{{ url_for('question.edit', question_id=question['id']) }}">
                                 Edit question
                             </a>
                             {% if question["is_solved"] %}
-                                <a type="button" class="btn btn-danger" href="{{ url_for('qa.question_set_solved', question_id=question['id'], solved_status='false') }}">
+                                <a type="button" class="btn btn-danger" href="{{ url_for('question.set_solved', question_id=question['id'], solved_status='false') }}">
                                     Set unsolved
                                 </a>
                             {% else %}
-                                <a type="button" class="btn btn-success" href="{{ url_for('qa.question_set_solved', question_id=question['id'], solved_status='true') }}">
+                                <a type="button" class="btn btn-success" href="{{ url_for('question.set_solved', question_id=question['id'], solved_status='true') }}">
                                     Set solved
                                 </a>
                             {% endif %}
                             {% if question["is_closed"] %}
-                                <a type="button" class="btn btn-success" href="{{ url_for('qa.question_set_closed', question_id=question['id'], closed_status='false') }}">
+                                <a type="button" class="btn btn-success" href="{{ url_for('question.set_closed', question_id=question['id'], closed_status='false') }}">
                                     Open
                                 </a>
                             {% else %}
-                                <a type="button" class="btn btn-danger" href="{{ url_for('qa.question_set_closed', question_id=question['id'], closed_status='true') }}">
+                                <a type="button" class="btn btn-danger" href="{{ url_for('question.set_closed', question_id=question['id'], closed_status='true') }}">
                                     Close
                                 </a>
                             {% endif %}
@@ -127,7 +127,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <a type="button" class="btn btn-danger" href="{{ url_for('qa.question_delete', question_id=question['id']) }}">
+                            <a type="button" class="btn btn-danger" href="{{ url_for('question.delete', question_id=question['id']) }}">
                                 Delete
                             </a>
                         </div>

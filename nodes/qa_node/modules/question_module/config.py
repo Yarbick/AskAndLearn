@@ -13,8 +13,8 @@ class Config:
 
     # Параметры
     path = dirname(__file__)
-    name = "qa"
-    url_prefix = "/qa"
+    name = "question"
+    url_prefix = "/question"
     static_folder = "static"
     static_url_path = join_path(path, static_folder)
     self_template_folder = join_path(path, "templates")

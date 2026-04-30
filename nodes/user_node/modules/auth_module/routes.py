@@ -73,7 +73,7 @@ def register():
 
     # Отображение страницы (GET)
     return render_template(
-        "register.html",
+        "auth/register.html",
         register_form=register_form
     )
 
@@ -106,7 +106,7 @@ def login():
 
     # Отображение страницы (GET)
     return render_template(
-        "login.html",
+        "auth/login.html",
         login_form=login_form
     )
 
@@ -174,6 +174,6 @@ def change_password():
 
     # Отображение страницы (GET)
     return render_template(
-        "change_password.html",
+        "auth/change_password.html",
         change_password_form=change_password_form
     )

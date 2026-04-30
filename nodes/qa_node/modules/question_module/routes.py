@@ -1,4 +1,4 @@
-"""Обработчики маршрутов модуля QA"""
+"""Обработчики маршрутов модуля Question"""
 
 # Работа с фреймворком
 from flask import render_template, url_for, redirect, request, flash, session as flask_session
@@ -24,9 +24,9 @@ import requests
 from os import remove as remove_file
 
 # Формы
-from .forms.question_create import QuestionCreateForm
-from .forms.question_edit import QuestionEditForm
-from .forms.question_search import QuestionSearchForm
+from .forms.create import QuestionCreateForm
+from .forms.edit import QuestionEditForm
+from .forms.search import QuestionSearchForm
 
 
 @bp.route("", methods=["GET"])
@@ -81,15 +81,15 @@ def home():
     your_questions: list = response.json()["questions"] if response else []
 
     return render_template(
-        "home.html",
+        "question/home.html",
         newest_questions=newest_questions,
         last_questions=last_questions,
         your_questions=your_questions
     )
 
 
-@bp.route("/question/<int:question_id>/view", methods=["GET"])
-def question_view(question_id: int):
+@bp.route("/<int:question_id>/view", methods=["GET"])
+def view(question_id: int):
     """Просмотр вопроса"""
 
     # Подготовка данных для REST API
@@ -103,19 +103,20 @@ def question_view(question_id: int):
     if response:
         question = response.json()["question"]
 
-        # Запись посещения вопроса в сессию
-        # Получение cookie-сессии последних вопросов
-        if not flask_session.get("last_questions", None):  # Создаём список, если сессии не существует
-            flask_session["last_questions"] = []
-        last_question: list = flask_session["last_questions"]
+        if current_user.is_authenticated:
+            # Запись посещения вопроса в сессию
+            # Получение cookie-сессии последних вопросов
+            if not flask_session.get("last_questions", None):  # Создаём список, если сессии не существует
+                flask_session["last_questions"] = []
+            last_question: list = flask_session["last_questions"]
 
-        # Добавление вопроса в список
-        if question_id not in last_question:  # Если не существует, то просто добавляем
-            flask_session["last_questions"] = ([question_id] + last_question)[:5]
-        else:  # Если существует, то удаляем старое посещение и добавляем новое
-            ind = last_question.index(question_id)
-            flask_session["last_questions"] = ([question_id] + last_question[:ind] + last_question[ind + 1:])[:5]
-        flask_session.permanent = True
+            # Добавление вопроса в список
+            if question_id not in last_question:  # Если не существует, то просто добавляем
+                flask_session["last_questions"] = ([question_id] + last_question)[:5]
+            else:  # Если существует, то удаляем старое посещение и добавляем новое
+                ind = last_question.index(question_id)
+                flask_session["last_questions"] = ([question_id] + last_question[:ind] + last_question[ind + 1:])[:5]
+            flask_session.permanent = True
     else:
         question = None
 
@@ -128,15 +129,15 @@ def question_view(question_id: int):
 
     # Отображение страницы (GET)
     return render_template(
-        "question_view.html",
+        "question/view.html",
         question=question,
         question_creator=question_creator
     )
 
 
-@bp.route("/question/create", methods=["GET", "POST"])
+@bp.route("/create", methods=["GET", "POST"])
 @login_required
-def question_create():
+def create():
     """Создание вопроса"""
 
     # Подготовка данных для REST API
@@ -163,7 +164,7 @@ def question_create():
                 )
             else:
                 flash(reason, "error")
-                return redirect(url_for("qa.question_create"))
+                return redirect(url_for("question.create"))
 
         # Создание вопроса через REST API
         # Подготовка данных
@@ -193,21 +194,21 @@ def question_create():
             question_id: int = response.json()["id"]
 
             # Перенос на страницу с созданным вопросом
-            return redirect(url_for("qa.question_view", question_id=question_id))
+            return redirect(url_for("question.view", question_id=question_id))
         else:
             # Обработка ошибок
             ResponseErrorHandler.flash_reason_message(response)
 
     # Отображение страницы (GET)
     return render_template(
-        "question_create.html",
+        "question/create.html",
         question_create_form=question_create_form
     )
 
 
-@bp.route("/question/<int:question_id>/edit", methods=["GET", "POST"])
+@bp.route("/<int:question_id>/edit", methods=["GET", "POST"])
 @login_required
-def question_edit(question_id: int):
+def edit(question_id: int):
     """Редактирование вопроса"""
 
     # Подготовка данных для REST API
@@ -243,7 +244,7 @@ def question_edit(question_id: int):
                     )
                 else:
                     flash(reason, "error")
-                    return redirect(url_for("qa.question_edit", question_id=question_id))
+                    return redirect(url_for("question.edit", question_id=question_id))
 
             # Редактирование вопроса через REST API
             # Подготовка данных
@@ -270,7 +271,7 @@ def question_edit(question_id: int):
                     image.save(f"{Config.static_url_path}/questions_images/{filename}")
 
                 # Перенос на страницу с отредактированным вопросом
-                return redirect(url_for("qa.question_view", question_id=question_id))
+                return redirect(url_for("question.view", question_id=question_id))
             else:
                 # Обработка ошибок
                 ResponseErrorHandler.flash_reason_message(response)
@@ -282,7 +283,7 @@ def question_edit(question_id: int):
 
         # Отображение страницы (GET)
         return render_template(
-            "question_edit.html",
+            "question/edit.html",
             question_edit_form=question_edit_form,
             question=question
         )
@@ -291,12 +292,12 @@ def question_edit(question_id: int):
         ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение в меню, если вопрос не удалось загрузить
-    return redirect(url_for("qa.home"))
+    return redirect(url_for("question.home"))
 
 
-@bp.route("/question/<int:question_id>/delete", methods=["GET", "POST"])
+@bp.route("/<int:question_id>/delete", methods=["GET", "POST"])
 @login_required
-def question_delete(question_id: int):
+def delete(question_id: int):
     """Удаление вопроса"""
 
     # Подготовка данных для REST API
@@ -326,7 +327,7 @@ def question_delete(question_id: int):
                 remove_file(f"{Config.static_url_path}/questions_images/{question["image"]}")
 
             # Возвращение в меню
-            return redirect(url_for("qa.home"))
+            return redirect(url_for("question.home"))
         else:
             # Обработка ошибок
             ResponseErrorHandler.flash_reason_message(response)
@@ -335,13 +336,13 @@ def question_delete(question_id: int):
         ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
-    next_url: str = request.args.get("next", url_for("qa.question_view", question_id=question_id))
+    next_url: str = request.args.get("next", url_for("question.view", question_id=question_id))
     return redirect(next_url)
 
 
-@bp.route("/question/<int:question_id>/delete/image", methods=["GET"])
+@bp.route("/<int:question_id>/delete/image", methods=["GET"])
 @login_required
-def question_delete_image(question_id: int):
+def delete_image(question_id: int):
     """Удаление изображения вопроса"""
 
     # Подготовка данных для REST API
@@ -382,13 +383,13 @@ def question_delete_image(question_id: int):
         ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
-    next_url: str = request.args.get("next", url_for("qa.question_edit", question_id=question_id))
+    next_url: str = request.args.get("next", url_for("question.edit", question_id=question_id))
     return redirect(next_url)
 
 
-@bp.route("/question/<int:question_id>/solved/<string:solved_status>", methods=["GET"])
+@bp.route("/<int:question_id>/solved/<string:solved_status>", methods=["GET"])
 @login_required
-def question_set_solved(question_id: int, solved_status: str):
+def set_solved(question_id: int, solved_status: str):
     """Изменение состояния is_solved"""
 
     # Подготовка данных для REST API
@@ -413,13 +414,13 @@ def question_set_solved(question_id: int, solved_status: str):
         ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
-    next_url: str = request.args.get("next", url_for("qa.question_view", question_id=question_id))
+    next_url: str = request.args.get("next", url_for("question.view", question_id=question_id))
     return redirect(next_url)
 
 
-@bp.route("/question/<int:question_id>/closed/<string:closed_status>", methods=["GET"])
+@bp.route("/<int:question_id>/closed/<string:closed_status>", methods=["GET"])
 @login_required
-def question_set_closed(question_id: int, closed_status: str):
+def set_closed(question_id: int, closed_status: str):
     """Изменение состояния is_closed"""
 
     # Подготовка данных для REST API
@@ -444,12 +445,12 @@ def question_set_closed(question_id: int, closed_status: str):
         ResponseErrorHandler.flash_reason_message(response)
 
     # Возвращение на предыдущую страницу
-    next_url: str = request.args.get("next", url_for("qa.question_view", question_id=question_id))
+    next_url: str = request.args.get("next", url_for("question.view", question_id=question_id))
     return redirect(next_url)
 
 
-@bp.route("/question/search", methods=["GET", "POST"])
-def question_search():
+@bp.route("/search", methods=["GET", "POST"])
+def search():
     """Поиск вопросов"""
 
     # Подготовка данных для REST API
@@ -462,7 +463,7 @@ def question_search():
     if search_form.validate_on_submit():
         # Обновление страницы с параметрами для поиска
         return redirect(url_for(
-            "qa.question_search",
+            "question.search",
             search=search_form.search.data,
             search_mode="name"
         ))
@@ -488,7 +489,7 @@ def question_search():
 
             # Отображение страницы (GET)
             return render_template(
-                "question_search.html",
+                "question/search.html",
                 search_form=search_form,
                 found_questions=found_questions
             )
@@ -498,6 +499,6 @@ def question_search():
 
     # Отображение страницы без данных для поиска (GET)
     return render_template(
-        "question_search.html",
+        "question/search.html",
         search_form=search_form
     )

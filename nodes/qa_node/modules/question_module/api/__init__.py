@@ -11,7 +11,7 @@ from .v1.questions.resources import QuestionResource, QuestionListResource
 
 # Создание и настройка Blueprint для API
 api_bp = Blueprint(
-    f"qa_api",
+    f"question_api",
     __name__,
     url_prefix="/api"
 )

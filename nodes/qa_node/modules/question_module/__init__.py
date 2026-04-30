@@ -1,4 +1,4 @@
-"""Инициализация модуля QA"""
+"""Инициализация модуля Question"""
 
 # Создание blueprint
 from .blueprint import bp

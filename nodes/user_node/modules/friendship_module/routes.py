@@ -45,13 +45,13 @@ def create_friendship_view_handler(friendship_status: str) -> str:
 
         # Отображение страницы (GET)
         return render_template(
-            "friendships.html",
+            "friendship/view.html",
             title=title,
             user_friendships=user_friendships
         )
     # Отображение страницы в случае ошибки (GET)
     return render_template(
-        "friendships.html",
+        "friendship/view.html",
         title=title,
         error_message=response.reason
     )

@@ -1,4 +1,4 @@
-"""QA Blueprint"""
+"""Question Blueprint"""
 
 # Работа с фреймворком
 from flask import Blueprint

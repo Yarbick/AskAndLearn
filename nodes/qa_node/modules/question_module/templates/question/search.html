@@ -15,7 +15,7 @@
                 <div class="list-group">
                     {% for question in found_questions %}
                         <div class="list-group-item list-group-item-action">
-                            <a href="{{ url_for('qa.question_view', question_id=question['id'])}}" class="list-item">
+                            <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
                                 {{ question["name"] }}
                             </a>
                         </div>
