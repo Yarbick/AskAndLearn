@@ -57,7 +57,12 @@ class File:
     def cut_filename(filename: str) -> str:
         """Обрезание имени файла до допустимых размеров (с запасом), чтобы избежать ошибки на сервере"""
 
-        return filename[:255]
+        # Разделение имени файла на имя и расширение
+        file_name, file_extension = ".".join(filename.split(".")[:-1]), filename.split(".")[-1]
+        # Обрезание и склеивание имени файла
+        cutted_filename: str = f"{file_name[:240 - len(file_extension) - 1]}.{file_extension}"
+
+        return cutted_filename
 
 
 class Image(File):
