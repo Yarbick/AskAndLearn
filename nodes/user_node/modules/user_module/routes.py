@@ -21,9 +21,9 @@ import requests
 from os import remove as remove_file
 
 # Формы
-from .forms.edit import EditForm
-from .forms.delete import DeleteForm
-from .forms.search import SearchForm
+from .forms.user.edit import EditForm
+from .forms.user.delete import DeleteForm
+from .forms.user.search import SearchForm
 
 
 @bp.route("/<int:user_id>/view", methods=["GET"])
