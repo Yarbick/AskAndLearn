@@ -32,7 +32,7 @@ class QuestionResource(Resource):
 
             # Вывод результата
             return jsonify({"question": question.to_dict(only=[
-                "id", "name", "content", "creator_id", "is_solved", "is_closed", "tags.name", "image"
+                "id", "name", "content", "creator_id", "is_solved", "is_closed", "tags.name", "image", "date_added"
             ])})
 
     def put(self, question_id: int):
@@ -120,7 +120,7 @@ class QuestionListResource(Resource):
             """Получение вопросов с учётом лимита"""
 
             if limit is not None:
-                return query.order_by(sa_desc(Question.id)).limit(limit).all()
+                return query.order_by(sa_desc(Question.date_added)).limit(limit).all()
             return query.all()
 
         # Получение данных из парсера

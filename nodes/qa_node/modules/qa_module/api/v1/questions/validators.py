@@ -1,11 +1,9 @@
 """Валидаторы для REST API ресурса"""
 
 # Работа с фреймворком
-from flask import request
 from flask_login import current_user
 
 # Работа с REST API
-import requests
 from flask_restful import abort
 
 # Работа с ORM
