@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Edit comment{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1 class="content-header-left">Edit comment</h1>
+        <form action="" method="post">
+            {{ comment_edit_form.hidden_tag() }}
+            <div class="mb-3">
+                <h4><label for="contentEditTextArea" class="form-label">{{ comment_edit_form.content.label }}</label></h4>
+                {{ comment_edit_form.content(class="form-control", id="contentEditTextArea", rows="6") }}
+            </div>
+            {{ comment_edit_form.submit(type="submit", class="btn btn-primary") }}
+        </form>
+    </div>
+{% endblock %}
