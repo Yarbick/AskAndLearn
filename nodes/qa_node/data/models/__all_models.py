@@ -3,3 +3,4 @@
 # Модели
 from . import question
 from . import tag
+from . import comment
