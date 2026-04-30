@@ -25,7 +25,7 @@ class Question(SerializerMixin, db_manager.declarative_base):
     is_solved = sa.Column("is_solved", sa.Boolean, default=False, nullable=False)
     is_closed = sa.Column("is_closed", sa.Boolean, default=False, nullable=False)
     image = sa.Column("image", sa.String, nullable=True)
-    date_added = sa.Column("date_added", sa.DateTime, default=datetime.now().date(), nullable=False)
+    date_added = sa.Column("date_added", sa.DateTime, default=datetime.now, nullable=False)
 
     # Связи с моделями
     tags = orm.relationship(

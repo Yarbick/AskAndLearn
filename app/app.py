@@ -44,6 +44,7 @@ from nodes.user_node.modules.user_module import bp as user_bp, api_bp as user_ap
 from nodes.user_node.modules.friendship_module import bp as friendship_bp, api_bp as friendship_api_bp
 # Узел qa_node
 from nodes.qa_node.modules.question_module import bp as question_bp, api_bp as question_api_bp
+from nodes.qa_node.modules.comment_module import bp as comment_bp, api_bp as comment_api_bp
 
 # Регистрация модулей
 # Узел welcome_node
@@ -57,3 +58,5 @@ app.register_blueprint(friendship_api_bp)
 # Узел qa_node
 app.register_blueprint(question_bp)
 app.register_blueprint(question_api_bp)
+app.register_blueprint(comment_bp)
+app.register_blueprint(comment_api_bp)

@@ -24,7 +24,7 @@ class Comment(SerializerMixin, db_manager.declarative_base):
     question_id = sa.Column("question_id", sa.Integer, sa.ForeignKey("question.id"), nullable=False)
     is_changed = sa.Column("is_changed", sa.Boolean, default=False, nullable=False)
     is_useful = sa.Column("is_useful", sa.Boolean, default=False, nullable=False)
-    date_added = sa.Column("date_added", sa.DateTime, default=datetime.now().date(), nullable=False)
+    date_added = sa.Column("date_added", sa.DateTime, default=datetime.now, nullable=False)
 
     # Связи с моделями
     question = orm.relationship("Question", foreign_keys=[question_id], back_populates="comments")
