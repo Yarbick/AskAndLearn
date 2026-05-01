@@ -8,6 +8,9 @@ from flask_login import current_user, login_required
 from security.csrf import create_csrf_request_session
 from security.file import Image
 
+# Обработка ошибок
+from exceptions.api.rest.shared import ResponseErrorHandler
+
 # Подключение к модулю
 from .blueprint import bp
 

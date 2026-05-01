@@ -17,6 +17,7 @@ from sqlalchemy import desc as sa_desc
 import sqlalchemy.orm as orm
 from qa_node import db_manager
 from qa_node.data.models.comment import Comment
+from qa_node.data.models.question import Question
 
 
 class CommentResource(Resource):
@@ -45,6 +46,7 @@ class CommentResource(Resource):
             # Проверки
             CommentValidators.is_exists(comment)
             CommentValidators.is_available(comment)
+            CommentValidators.is_question_closed(comment)
 
             # Изменение комментария
             for field_name, value in comment_data.items():
@@ -65,6 +67,7 @@ class CommentResource(Resource):
             # Проверки
             CommentValidators.is_exists(comment)
             CommentValidators.is_available(comment)
+            CommentValidators.is_question_closed(comment)
 
             # Удаление комментария
             db_session.delete(comment)
@@ -108,9 +111,14 @@ class CommentListResource(Resource):
         # Добавление в БД
         with db_manager.create_session() as db_session:
             # Создание комментария
-            comment = Comment()
+            comment: Comment = Comment()
             for field_name, value in comment_data.items():
                 setattr(comment, field_name, value)
+            # Проверки
+            question: Question = db_session.get(Question, comment.question_id)
+            CommentValidators.is_exists(question)
+            CommentValidators.is_question_closed(question)
+            CommentValidators.is_available(comment)
 
             # Добавление объекта в БД
             db_session.add(comment)
@@ -118,3 +126,26 @@ class CommentListResource(Resource):
 
             # Вывод результата
             return make_response(jsonify({"id": comment.id}), 201)
+
+    def patch(self):
+        """Удаление связи комментариев с автором"""
+
+        # Получение данных из парсера
+        creator_id: int = CommentParsers.patch_delete_creator_relationship.parse_args()["creator_id"]
+
+        # Удаление связи комментариев с автором в БД
+        with db_manager.create_session() as db_session:
+            # Получение комментариев из БД
+            comments: list[Comment] = db_session.query(Comment).filter(Comment.creator_id == creator_id).all()
+            # Проверки
+            if comments: CommentValidators.is_available(comments[0])
+
+            # Изменение комментариев (замена ID автора на None)
+            for comment in comments:
+                comment.creator_id = None
+
+            # Сохранение изменений
+            db_session.commit()
+
+            # Вывод результата
+            return jsonify({"success": "OK"})

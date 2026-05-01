@@ -23,4 +23,4 @@ class FriendshipParsers:
     post_parser.add_argument("status", type=str, required=True, choices=("accepted", "pending", "blocked"))
 
     put_parser = reqparse.RequestParser()
-    put_parser.add_argument("status", type=str, choices=("accepted", "pending", "blocked"))
+    put_parser.add_argument("status", type=str, required=True, choices=("accepted", "pending", "blocked"))

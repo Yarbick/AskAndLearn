@@ -38,7 +38,7 @@ class QuestionResource(Resource):
     def put(self, question_id: int):
         # Получение данных из парсера
         question_data: dict = QuestionParsers.put_parser.parse_args()
-        tags: list = question_data.pop("tags", None)
+        tags: list = question_data.pop("tags", "").split(", ")
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
@@ -47,6 +47,8 @@ class QuestionResource(Resource):
             # Проверки
             QuestionValidators.is_exists(question)
             QuestionValidators.is_available(question)
+            if not question_data["is_closed"] is False:
+                QuestionValidators.is_question_closed(question)
 
             # Изменение вопроса
             for field_name, value in question_data.items():
@@ -65,16 +67,17 @@ class QuestionResource(Resource):
 
                 # Создание новых тегов
                 for tag_name in tags:
-                    # Получение тега из БД
-                    tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
+                    if tag_name:
+                        # Получение тега из БД
+                        tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
 
-                    # Создание тега, если его не существует
-                    if not tag:
-                        tag = Tag(name=tag_name)
-                        db_session.add(tag)
+                        # Создание тега, если его не существует
+                        if not tag:
+                            tag: Tag = Tag(name=tag_name)
+                            db_session.add(tag)
 
-                    # Привязка тега к вопросу
-                    question.tags.append(tag)
+                        # Привязка тега к вопросу
+                        question.tags.append(tag)
                 db_session.commit()
 
                 # Удаление тегов, которые не используются в других вопросах
@@ -97,6 +100,10 @@ class QuestionResource(Resource):
 
             # Сохранение тегов для проверки
             tags_to_check: list[Tag] = question.tags.copy()
+
+            # Удаление комментариев под вопросом
+            for comment in question.comments:
+                db_session.delete(comment)
 
             # Удаление вопроса
             db_session.delete(question)
@@ -168,7 +175,7 @@ class QuestionListResource(Resource):
     def post(self):
         # Получение данных из парсера
         question_data: dict = QuestionParsers.post_parser.parse_args()
-        tags: list = question_data.pop("tags", None)
+        tags: list = question_data.pop("tags", "").split(", ")
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
@@ -181,25 +188,50 @@ class QuestionListResource(Resource):
             question = Question()
             for field_name, value in question_data.items():
                 setattr(question, field_name, value)
+            # Проверки
+            QuestionValidators.is_available(question)
 
             # Добавление объекта в БД
             db_session.add(question)
             db_session.commit()
 
             # Добавление тегов
-            if tags is not None:
-                for tag_name in tags:
+            for tag_name in tags:
+                if tag_name:
                     # Получение тега из БД
-                    tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
+                    tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
 
                     # Создание тега, если его не существует
                     if not tag:
-                        tag = Tag(name=tag_name)
+                        tag: Tag = Tag(name=tag_name)
                         db_session.add(tag)
 
                     # Привязка тега к вопросу
                     question.tags.append(tag)
-                db_session.commit()
+            db_session.commit()
 
             # Вывод результата
             return make_response(jsonify({"id": question.id}), 201)
+
+    def patch(self):
+        """Удаление связи вопросов с автором"""
+
+        # Получение данных из парсера
+        creator_id: int = QuestionParsers.patch_delete_creator_relationship.parse_args()["creator_id"]
+
+        # Удаление связи вопросов с автором в БД
+        with db_manager.create_session() as db_session:
+            # Получение вопросов из БД
+            questions: list[Question] = db_session.query(Question).filter(Question.creator_id == creator_id).all()
+            # Проверки
+            if questions: QuestionValidators.is_available(questions[0])
+
+            # Изменение вопросов (замена ID автора на None)
+            for question in questions:
+                question.creator_id = None
+
+            # Сохранение изменений
+            db_session.commit()
+
+            # Вывод результата
+            return jsonify({"success": "OK"})

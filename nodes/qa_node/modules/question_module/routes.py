@@ -246,10 +246,8 @@ def create():
         json_params = {
             "name": question_create_form.name.data,
             "creator_id": current_user.id,
-            "tags": question_create_form.tags.data.split(", "),
-            "content": question_create_form.content.data,
-            "is_solved": False,
-            "is_closed": False
+            "tags": question_create_form.tags.data.strip(),
+            "content": question_create_form.content.data.strip()
         }
         if image: json_params["image"] = filename
         # Запрос
@@ -328,8 +326,8 @@ def edit(question_id: int):
             # Подготовка данных
             json_params = {
                 "name": question_edit_form.name.data,
-                "tags": question_edit_form.tags.data.split(", "),
-                "content": question_edit_form.content.data
+                "tags": question_edit_form.tags.data.strip(),
+                "content": question_edit_form.content.data.strip()
             }
             if image: json_params["image"] = filename
             # Запрос

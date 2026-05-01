@@ -4,14 +4,14 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
 from wtforms import StringField, TextAreaField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Length
 
 
 class EditForm(FlaskForm):
     """Форма редактирования пользователя"""
 
     # Поля
-    name = StringField("Name", validators=[DataRequired()])
+    name = StringField("Name", validators=[DataRequired(), Length(max=16)])
     description = TextAreaField("Description")
     icon = FileField(
         "Icon",

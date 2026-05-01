@@ -22,7 +22,6 @@ class UserParsers:
 
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("name", type=str)
-    put_parser.add_argument("login", type=str)
     put_parser.add_argument("password", type=str)
     put_parser.add_argument("description", type=str)
     put_parser.add_argument("icon", type=str)

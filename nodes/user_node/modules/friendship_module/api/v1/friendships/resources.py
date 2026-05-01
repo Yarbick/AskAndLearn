@@ -11,13 +11,12 @@ from flask_restful import Resource
 from .parsers import FriendshipParsers
 
 # Валидаторы
-from .validators import FriendshipAborts, FriendshipValidators, FriendshipStatusValidators
+from .validators import FriendshipAborts, FriendshipValidators
 
 # Работа с ORM
 import sqlalchemy as sa
 from user_node import db_manager
 from user_node.data.models.friendship import Friendship
-from user_node.data.models.friendship_status import FriendshipStatus
 
 
 class FriendshipResource(Resource):
@@ -40,7 +39,7 @@ class FriendshipResource(Resource):
 
     def put(self, user_id: int, friend_id: int):
         # Получение данных из парсера
-        friendship_data: dict = FriendshipParsers.put_parser.parse_args()
+        status: str = FriendshipParsers.put_parser.parse_args()["status"]
 
         # Изменение данных в БД (учитываются обе стороны)
         with db_manager.create_session() as db_session:
@@ -49,19 +48,15 @@ class FriendshipResource(Resource):
                 ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
                 ((Friendship.friend_id == user_id) & (Friendship.user_id == friend_id))
             ).all()
-            # Получение статуса
-            status = db_session.query(FriendshipStatus).filter(
-                FriendshipStatus.name == friendship_data["status"]).first()
 
             # Проверки
             FriendshipValidators.is_exists(friendships)
-            for friendship in friendships: FriendshipValidators.is_available(friendship, next_status=status.name)
-            FriendshipStatusValidators.is_exists(status)
+            for friendship in friendships: FriendshipValidators.is_available(friendship, next_status=status)
 
             # Изменение дружбы
             for friendship in friendships:
                 friendship.last_changed_by = user_id
-                friendship.status_id = status.id
+                friendship.status = status
 
             # Сохранение изменений
             db_session.commit()
@@ -101,21 +96,21 @@ class FriendshipListResource(Resource):
         with db_manager.create_session() as db_session:
             if filter_params["search"]:  # С фильтром
                 if not filter_params["search_mode"] or filter_params["search_mode"] == "status":  # Фильтр по статусу
-                    status: str = filter_params["search"]
-                    friendships: list[Friendship] = db_session.query(Friendship).join(Friendship.status).filter(
+                    statuses: list[str] = filter_params["search"]
+                    friendships: list[Friendship] = db_session.query(Friendship).filter(
                         Friendship.user_id == user_id,
-                        FriendshipStatus.name.in_(status),
-                        sa.not_((FriendshipStatus.name == "blocked") & (Friendship.last_changed_by != user_id))
+                        Friendship.status.in_(statuses),
+                        sa.not_((Friendship.status == "blocked") & (Friendship.last_changed_by != user_id))
                     ).all()
             else:  # Без фильтра
-                friendships: list[Friendship] = db_session.query(Friendship).join(Friendship.status).filter(
+                friendships: list[Friendship] = db_session.query(Friendship).filter(
                     Friendship.user_id == user_id,
-                    sa.not_((FriendshipStatus.name == "blocked") & (Friendship.last_changed_by != user_id))
+                    sa.not_((Friendship.status == "blocked") & (Friendship.last_changed_by != user_id))
                 ).all()
 
             # Вывод результата
             return jsonify({"friendships": [friendship.to_dict(only=[
-                "friend.id", "friend.name", "friend.icon", "status.name", "last_changed_by"
+                "friend.id", "friend.name", "friend.icon", "status", "last_changed_by"
             ]) for friendship in friendships]})
 
     def post(self, user_id: int):
@@ -124,25 +119,21 @@ class FriendshipListResource(Resource):
 
         # Добавление в БД (учитываются обе стороны)
         with db_manager.create_session() as db_session:
-            # Получение статуса
-            status = db_session.query(FriendshipStatus).filter(
-                FriendshipStatus.name == friendship_data["status"]).first()
-
             # Проверки
             if db_session.query(Friendship).filter(
                     ((Friendship.user_id == user_id) & (Friendship.friend_id == friendship_data["friend_id"])) |
                     ((Friendship.friend_id == user_id) & (Friendship.user_id == friendship_data["friend_id"]))
-            ).first():
-                FriendshipAborts.already_exist()
+            ).first(): FriendshipAborts.already_exist()
             FriendshipValidators.are_different_ids(user_id, friendship_data["friend_id"])
-            FriendshipStatusValidators.is_exists(status)
 
             # Создание дружбы
             friendship_as_user = Friendship(
-                user_id=user_id, friend_id=friendship_data["friend_id"], last_changed_by=user_id, status_id=status.id
+                user_id=user_id, friend_id=friendship_data["friend_id"], last_changed_by=user_id,
+                status=friendship_data["status"]
             )
             friendship_as_friend = Friendship(
-                user_id=friendship_data["friend_id"], friend_id=user_id, last_changed_by=user_id, status_id=status.id
+                user_id=friendship_data["friend_id"], friend_id=user_id, last_changed_by=user_id,
+                status=friendship_data["status"]
             )
 
             # Добавление объекта в БД

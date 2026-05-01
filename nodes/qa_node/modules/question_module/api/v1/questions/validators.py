@@ -37,6 +37,12 @@ class QuestionAborts:
 
         abort(400, error="The user already has a question with the given title")
 
+    @staticmethod
+    def question_closed():
+        """Вопрос закрыт"""
+
+        abort(400, error="Question closed")
+
 
 class QuestionValidators:
     """Методы для проверки"""
@@ -55,3 +61,9 @@ class QuestionValidators:
         if not current_user.is_authenticated: QuestionAborts.unauthorized()
         # Проверка на доступ к вопросу
         if question.creator_id != current_user.id: QuestionAborts.forbidden()
+
+    @staticmethod
+    def is_question_closed(question: Question) -> None:
+        """Проверка на закрытие вопроса"""
+
+        if question.is_closed: QuestionAborts.question_closed()
