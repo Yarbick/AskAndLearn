@@ -9,7 +9,7 @@
 {% block content %}
     <div class="content-container">
         {% if displayed_user %}
-            {% if not (friendship and friendship["status"]["name"] == "blocked" and friendship["last_changed_by"] != current_user.id) %}
+            {% if not (friendship and friendship["status"] == "blocked" and friendship["last_changed_by"] != current_user.id) %}
                 <div class="profile-user-header-container">
                     {% if displayed_user["icon"] %}
                         <img src="{{ url_for('user.static', filename='users_icons/' + displayed_user['icon']) }}"
@@ -34,7 +34,7 @@
                                             Send friendship request
                                         </a>
                                     {% endif %}
-                                    {% if friendship and friendship["status"]["name"] == "blocked" and friendship["last_changed_by"] == current_user.id %}
+                                    {% if friendship and friendship["status"] == "blocked" and friendship["last_changed_by"] == current_user.id %}
                                         <a type="button" class="btn btn-success"
                                            href="{{ url_for('friendship.delete', friend_id=displayed_user['id'], next=request.url) }}">
                                             Unblock

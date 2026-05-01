@@ -3,4 +3,3 @@
 # Модели
 from . import user
 from . import friendship
-from . import friendship_status

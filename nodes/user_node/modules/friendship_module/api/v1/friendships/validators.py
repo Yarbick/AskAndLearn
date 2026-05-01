@@ -8,7 +8,6 @@ from flask_restful import abort
 
 # Работа с ORM
 from user_node.data.models.friendship import Friendship
-from user_node.data.models.friendship_status import FriendshipStatus
 
 
 class FriendshipAborts:
@@ -72,33 +71,13 @@ class FriendshipValidators:
 
         if not current_user.is_authenticated: FriendshipAborts.unauthorized()
         if current_user.id not in (friendship.user_id, friendship.friend_id): FriendshipAborts.forbidden()
-        if friendship.last_changed_by != current_user.id and friendship.status.name == "blocked":
+        if friendship.last_changed_by != current_user.id and friendship.status == "blocked":
             FriendshipAborts.blocked()
         if (next_status == "accepted" and friendship.last_changed_by == current_user.id
-                and friendship.status.name == "pending"): FriendshipAborts.self_confirmation_attempt()
+                and friendship.status == "pending"): FriendshipAborts.self_confirmation_attempt()
 
     @staticmethod
     def are_different_ids(user_id: int, friend_id: int) -> None:
         """Проверка на разность ID"""
 
         if user_id == friend_id: FriendshipAborts.equal_ids()
-
-
-class FriendshipStatusAborts:
-    """Методы для вызова ошибок"""
-
-    @staticmethod
-    def not_found() -> None:
-        """Статус дружбы не найден"""
-
-        abort(404, error="Friendship status not found")
-
-
-class FriendshipStatusValidators:
-    """Методы для проверки"""
-
-    @staticmethod
-    def is_exists(friendship_status: FriendshipStatus) -> None:
-        """Проверка на существование статуса дружбы"""
-
-        if not friendship_status: FriendshipStatusAborts.not_found()

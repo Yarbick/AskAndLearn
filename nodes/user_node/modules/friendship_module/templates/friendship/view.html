@@ -40,7 +40,7 @@
                                 {{ friendship["friend"]["name"] }}
                             </a>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                {% if friendship["last_changed_by"] != current_user.id and friendship["status"]["name"] == "pending" %}
+                                {% if friendship["last_changed_by"] != current_user.id and friendship["status"] == "pending" %}
                                     <a type="button" class="btn btn-success"
                                        href="{{ url_for('friendship.accept', friend_id=friendship['friend']['id'], next=request.url) }}">
                                         Accept

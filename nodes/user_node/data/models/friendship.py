@@ -18,9 +18,8 @@ class Friendship(SerializerMixin, db_manager.declarative_base):
     user_id = sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False)
     friend_id = sa.Column("friend_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False)
     last_changed_by = sa.Column("last_changed_by", sa.Integer, nullable=False)
-    status_id = sa.Column("status_id", sa.Integer, sa.ForeignKey("friendship_status.id"), nullable=False)
+    status = sa.Column("status", sa.String, nullable=False)
 
     # Связь с моделями
     user = orm.relationship("User", foreign_keys=[user_id])
     friend = orm.relationship("User", foreign_keys=[friend_id])
-    status = orm.relationship("FriendshipStatus", foreign_keys=[status_id])
