@@ -105,3 +105,34 @@ def delete(comment_id: id):
     # Возвращение на предыдущую страницу
     next_url: str = request.args.get("next", url_for("question.home"))
     return redirect(next_url)
+
+
+@bp.route("/<int:comment_id>/useful/<string:useful_status>", methods=["GET"])
+@login_required
+def set_useful(comment_id: int, useful_status: str):
+    """Изменение состояния is_useful"""
+
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+
+    # Изменение состояния is_closed через REST API
+    # Подготовка данных
+    json_params = {
+        "is_useful": useful_status == "true"
+    }
+    # Запрос
+    response: requests.Response = request_session.patch(
+        f"{server_address}/api/v1/comments/{comment_id}",
+        json=json_params,
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if not response:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("question.home"))
+    return redirect(next_url)

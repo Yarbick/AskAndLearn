@@ -9,6 +9,7 @@ from flask_restful import abort
 
 # Работа с ORM
 from qa_node.data.models.comment import Comment
+
 from qa_node.data.models.question import Question
 
 
@@ -65,6 +66,14 @@ class CommentValidators:
         if not current_user.is_authenticated: CommentAborts.unauthorized()
         # Проверка на доступ к комментарию
         if comment.creator_id != current_user.id: CommentAborts.forbidden()
+
+    @staticmethod
+    def is_question_author(comment: Comment) -> None:
+
+        # Проверка на авторизацию пользователя
+        if not current_user.is_authenticated: CommentAborts.unauthorized()
+        # Является ли автором вопроса
+        if comment.question.creator_id != current_user.id: CommentAborts.forbidden()
 
     @staticmethod
     def is_question_closed(obj: Comment | Question) -> None:

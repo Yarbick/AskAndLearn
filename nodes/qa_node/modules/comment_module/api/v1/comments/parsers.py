@@ -21,7 +21,9 @@ class CommentParsers:
 
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("content", type=str)
-    put_parser.add_argument("is_useful", type=bool)
+
+    patch_useful_parser = reqparse.RequestParser()
+    patch_useful_parser.add_argument("is_useful", type=bool)
 
     patch_delete_creator_relationship = reqparse.RequestParser()
     patch_delete_creator_relationship.add_argument("creator_id", type=int, required=True)

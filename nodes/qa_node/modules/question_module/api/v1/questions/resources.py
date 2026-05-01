@@ -170,7 +170,9 @@ class QuestionListResource(Resource):
                 questions: list[Question] = get_by_limit(query, limit)
 
             # Вывод результата
-            return jsonify({"questions": [question.to_dict(only=["id", "name"]) for question in questions]})
+            return jsonify(
+                {"questions": [question.to_dict(only=["id", "name", "tags.name"]) for question in questions]}
+            )
 
     def post(self):
         # Получение данных из парсера

@@ -76,6 +76,30 @@ class CommentResource(Resource):
             # Вывод результата
             return jsonify({"success": "OK"})
 
+    def patch(self, comment_id: int):
+        """Изменение состояния is_useful"""
+
+        # Получение данных из парсера
+        comment_data: dict = CommentParsers.patch_useful_parser.parse_args()
+
+        # Изменение данных в БД
+        with db_manager.create_session() as db_session:
+            # Получение комментария из БД
+            comment: Comment = db_session.get(Comment, comment_id)
+            # Проверки
+            CommentValidators.is_exists(comment)
+            CommentValidators.is_question_author(comment)
+            CommentValidators.is_question_closed(comment)
+
+            # Изменение состояния is_useful
+            comment.is_useful = comment_data["is_useful"]
+
+            # Сохранение изменений
+            db_session.commit()
+
+            # Вывод результата
+            return jsonify({"success": "OK"})
+
 
 class CommentListResource(Resource):
     """Ресурс списка комментариев"""

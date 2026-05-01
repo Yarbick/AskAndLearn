@@ -19,7 +19,7 @@
                 <div class="list-group">
                     {% for user in found_users %}
                         {% if user["id"] != current_user.id %}
-                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
                                 <a href="{{ url_for('user.view', user_id=user['id'])}}" class="list-item">
                                     {% if user["icon"] %}
                                         <img src="{{ url_for('user.static', filename='users_icons/' + user['icon']) }}"

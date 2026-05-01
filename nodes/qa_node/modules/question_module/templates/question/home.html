@@ -24,10 +24,17 @@
                     <div class="list-group mt-3">
                         {% if newest_questions %}
                             {% for question in newest_questions %}
-                                <div class="list-group-item list-group-item-action">
+                                <div class="list-group-item list-group-item-action list-item-word-wrap">
                                     <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
                                         {{ question["name"] }}
                                     </a>
+                                    <div style="line-height: 2.2;">
+                                        {% for tag in question["tags"] %}
+                                            <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                                {{ tag["name"] }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             {% endfor %}
                         {% else %}
@@ -40,10 +47,17 @@
                     <div class="list-group mt-3">
                         {% if last_questions %}
                             {% for question in last_questions %}
-                                <div class="list-group-item list-group-item-action">
+                                <div class="list-group-item list-group-item-action list-item-word-wrap">
                                     <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
                                         {{ question["name"] }}
                                     </a>
+                                    <div style="line-height: 2.2;">
+                                        {% for tag in question["tags"] %}
+                                            <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                                {{ tag["name"] }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             {% endfor %}
                         {% else %}
@@ -57,10 +71,17 @@
                 <div class="list-group mt-3">
                     {% if your_questions %}
                         {% for question in your_questions %}
-                            <div class="list-group-item list-group-item-action">
+                            <div class="list-group-item list-group-item-action list-item-word-wrap">
                                 <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
                                     {{ question["name"] }}
                                 </a>
+                                <div style="line-height: 2.2;">
+                                    {% for tag in question["tags"] %}
+                                        <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                            {{ tag["name"] }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
                             </div>
                         {% endfor %}
                     {% else %}
