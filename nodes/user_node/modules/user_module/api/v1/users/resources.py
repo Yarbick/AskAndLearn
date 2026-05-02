@@ -72,10 +72,12 @@ class UserResource(Resource):
             for friendship in set(user.friendships_as_user).union(user.friendships_as_friend):
                 db_session.delete(friendship)
 
-            # Удаление связей с вопросами и комментариями через REST API
-            # Подготовка данных
+            # Подготовка данных для REST API
             server_address = f"{request.scheme}://{request.host}"
             request_session: requests.Session = create_csrf_request_session(server_address)
+
+            # Удаление связей с вопросами и комментариями через REST API
+            # Подготовка данных
             json_params = {
                 "creator_id": user_id
             }
@@ -90,6 +92,19 @@ class UserResource(Resource):
                 json=json_params,
                 cookies=request.cookies
             )  # Удаление связей с комментариями
+
+            # Очистка избранных через REST API
+            # Подготовка данных
+            json_params = {
+                "search": user_id,
+                "search_mode": "user"
+            }
+            # Запросы
+            request_session.delete(
+                f"{server_address}/api/v1/favorites",
+                json=json_params,
+                cookies=request.cookies
+            )
 
             # Удаление пользователя
             db_session.delete(user)

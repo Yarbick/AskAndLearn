@@ -65,12 +65,13 @@
                                 <div class="d-flex">
                                     <p class="sub-text mb-1" style="width: 80%;">{{ favorites | length }} favorites</p>
                                     <div class="d-md-flex justify-content-md-end" style="width: 20%;">
-                                        {% if not favorites|selectattr("user_id", "equalto", current_user.id)|first %}
+                                        {% set favorite = favorites|selectattr("user_id", "equalto", current_user.id)|first %}
+                                        {% if not favorite %}
                                             <a type="button" class="btn btn-warning btn-sm text-light" style="font-size: 18px;" href="{{ url_for('favorite.create', question_id=question['id'], next=request.url) }}">
                                                 ★
                                             </a>
                                         {% else %}
-                                            <a type="button" class="btn btn-danger btn-sm text-light" style="font-size: 18px;" href="{{ url_for('favorite.delete', favorite_id=question['id'], next=request.url) }}">
+                                            <a type="button" class="btn btn-danger btn-sm text-light" style="font-size: 18px;" href="{{ url_for('favorite.delete', favorite_id=favorite['id'], next=request.url) }}">
                                                 ★
                                             </a>
                                         {% endif %}

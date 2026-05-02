@@ -103,3 +103,34 @@ class FavoriteListResource(Resource):
 
             # Вывод результата
             return make_response(jsonify({"id": favorite.id}), 201)
+
+    def delete(self):
+        # Получение данных из парсера
+        params = FavoriteParsers.get_list_parser.parse_args()
+
+        # Удаление избранных вопросов из БД
+        with db_manager.create_session() as db_session:
+            # Получение избранных вопросов
+            if params["search"]:  # С фильтром
+                if not params["search_mode"] or params["search_mode"] == "user":  # Фильтр по пользователю
+                    user_id: int = int(params["search"])
+                    favorites: list[Favorite] = db_session.query(Favorite).filter(
+                        Favorite.user_id == user_id
+                    ).all()
+                elif params["search_mode"] == "question":  # Фильтр по вопросу
+                    question_id: int = int(params["search"])
+                    favorites: list[Favorite] = db_session.query(Favorite).filter(
+                        Favorite.question_id == question_id
+                    ).all()
+            else:  # Без фильтра
+                favorites: list[Favorite] = db_session.query(Favorite).all()
+
+            # Удаление избранных вопросов
+            for favorite in favorites:
+                db_session.delete(favorite)
+
+            # Сохранение изменений
+            db_session.commit()
+
+            # Вывод результата
+            return jsonify({"success": "OK"})

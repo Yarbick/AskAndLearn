@@ -105,6 +105,10 @@ class QuestionResource(Resource):
             for comment in question.comments:
                 db_session.delete(comment)
 
+            # Удаление вопроса из избранных у пользователей
+            for favorite in question.favorites:
+                db_session.delete(favorite)
+
             # Удаление вопроса
             db_session.delete(question)
             db_session.commit()

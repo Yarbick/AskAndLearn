@@ -10,9 +10,18 @@
                 <div class="list-group mt-4">
                     {% for favorite in favorites %}
                         <div class="list-group-item d-flex justify-content-between align-items-start">
-                            <a href="{{ url_for('question.view', question_id=favorite['question']['id'])}}">
-                                {{ favorite["question"]["name"] }}
-                            </a>
+                            <div>
+                                <a class="list-item" href="{{ url_for('question.view', question_id=favorite['question']['id'])}}">
+                                    {{ favorite["question"]["name"] }}
+                                </a>
+                                <div style="line-height: 2.2;">
+                                    {% for tag in favorite["question"]["tags"] %}
+                                        <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                            {{ tag["name"] }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                 <a type="button" class="btn btn-danger" href="{{ url_for('favorite.delete', favorite_id=favorite['id'], next=request.url) }}">
                                     Delete
