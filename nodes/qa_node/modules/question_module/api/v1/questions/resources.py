@@ -38,7 +38,7 @@ class QuestionResource(Resource):
     def put(self, question_id: int):
         # Получение данных из парсера
         question_data: dict = QuestionParsers.put_parser.parse_args()
-        tags: list = question_data.pop("tags", "").split(", ")
+        tags: list = None if question_data.get("tags", None) is None else question_data.pop("tags", "").split(", ")
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
@@ -177,7 +177,7 @@ class QuestionListResource(Resource):
     def post(self):
         # Получение данных из парсера
         question_data: dict = QuestionParsers.post_parser.parse_args()
-        tags: list = question_data.pop("tags", "").split(", ")
+        tags: list = None if question_data.get("tags", None) is None else question_data.pop("tags", "").split(", ")
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
@@ -198,19 +198,20 @@ class QuestionListResource(Resource):
             db_session.commit()
 
             # Добавление тегов
-            for tag_name in tags:
-                if tag_name:
-                    # Получение тега из БД
-                    tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
+            if tags is not None:
+                for tag_name in tags:
+                    if tag_name:
+                        # Получение тега из БД
+                        tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
 
-                    # Создание тега, если его не существует
-                    if not tag:
-                        tag: Tag = Tag(name=tag_name)
-                        db_session.add(tag)
+                        # Создание тега, если его не существует
+                        if not tag:
+                            tag: Tag = Tag(name=tag_name)
+                            db_session.add(tag)
 
-                    # Привязка тега к вопросу
-                    question.tags.append(tag)
-            db_session.commit()
+                        # Привязка тега к вопросу
+                        question.tags.append(tag)
+                db_session.commit()
 
             # Вывод результата
             return make_response(jsonify({"id": question.id}), 201)
