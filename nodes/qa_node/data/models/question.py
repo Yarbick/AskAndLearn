@@ -33,4 +33,11 @@ class Question(SerializerMixin, db_manager.declarative_base):
         secondary="tag_to_question",
         back_populates="questions"
     )
-    comments = orm.relationship("Comment", back_populates="question")
+    comments = orm.relationship(
+        "Comment",
+        back_populates="question"
+    )
+    favorites = orm.relationship(
+        "Favorite",
+        back_populates="question"
+    )
