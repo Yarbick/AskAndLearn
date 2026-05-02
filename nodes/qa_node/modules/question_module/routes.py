@@ -133,6 +133,7 @@ def view(question_id: int):
     response: requests.Response = request_session.get(f"{server_address}/api/v1/questions/{question_id}")
 
     # Обработка запроса
+    question = None
     if response:
         question = response.json()["question"]
 
@@ -150,15 +151,12 @@ def view(question_id: int):
                 ind = last_question.index(question_id)
                 flask_session["last_questions"] = ([question_id] + last_question[:ind] + last_question[ind + 1:])[:5]
             flask_session.permanent = True
-    else:
-        question = None
 
     # Получение данных об авторе вопроса
+    question_creator = None
     if question and question["creator_id"]:
         response: requests.Response = request_session.get(f"{server_address}/api/v1/users/{question["creator_id"]}")
         question_creator = response.json()["user"] if response else None
-    else:
-        question_creator = None
 
     # Получение данных о комментариях на вопрос
     comments: list[dict] = []
@@ -200,13 +198,33 @@ def view(question_id: int):
                     creators_cash[comment["creator_id"]] = creator
                     comment["creator"] = creator
 
+    # Получение данных об избранных
+    favorites: list[dict] = []
+    if question:
+        # Получение данных об избранных через REST API
+        # Подготовка данных
+        json_params = {
+            "search": question["id"],
+            "search_mode": "question"
+        }
+        # Запрос
+        response: requests.Response = request_session.get(
+            f"{server_address}/api/v1/favorites",
+            json=json_params
+        )
+
+        # Обработка запроса
+        if response:
+            favorites = response.json()["favorites"]
+
     # Отображение страницы (GET)
     return render_template(
         "question/view.html",
         comment_create_form=comment_create_form,
         question=question,
         question_creator=question_creator,
-        comments=comments
+        comments=comments,
+        favorites=favorites
     )
 
 

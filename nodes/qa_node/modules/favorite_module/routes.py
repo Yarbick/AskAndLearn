@@ -54,9 +54,65 @@ def view():
     )
 
 
+@bp.route("/<int:question_id>/create", methods=["GET"])
+@login_required
+def create(question_id: int):
+    """Добавление вопроса в избранные"""
+
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+
+    # Добавление вопроса в избранные через REST API
+    # Подготовка данных
+    json_params = {
+        "question_id": question_id,
+        "user_id": current_user.id
+    }
+    # Запрос
+    response: requests.Response = request_session.post(
+        f"{server_address}/api/v1/favorites",
+        json=json_params,
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if response:
+        # Вывод сообщения
+        flash("Question added to favorites", "info")
+    else:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("question.view", question_id=question_id))
+    return redirect(next_url)
+
+
 @bp.route("/<int:favorite_id>/delete", methods=["GET"])
 @login_required
 def delete(favorite_id: int):
     """Удаление вопроса из избранных"""
 
-    pass
+    # Подготовка данных для REST API
+    server_address = f"{request.scheme}://{request.host}"
+    request_session: requests.Session = create_csrf_request_session(server_address)
+
+    # Удаление вопроса из избранных через REST API
+    # Запрос
+    response: requests.Response = request_session.delete(
+        f"{server_address}/api/v1/favorites/{favorite_id}",
+        cookies=request.cookies
+    )
+
+    # Обработка запроса
+    if response:
+        # Вывод сообщения
+        flash("The question has been removed from favorites", "info")
+    else:
+        # Обработка ошибок
+        ResponseErrorHandler.flash_reason_message(response)
+
+    # Возвращение на предыдущую страницу
+    next_url: str = request.args.get("next", url_for("question.home"))
+    return redirect(next_url)
