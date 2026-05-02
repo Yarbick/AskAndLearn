@@ -37,6 +37,12 @@ class UserAborts:
 
         abort(403, error="Access is denied")
 
+    @staticmethod
+    def very_long_field(field_name: str = "Field"):
+        """Поле слишком длинное"""
+
+        abort(400, error=f"{field_name} is too long")
+
 
 class UserValidators:
     """Методы для проверки"""
@@ -53,3 +59,10 @@ class UserValidators:
 
         if not current_user.is_authenticated: UserAborts.unauthorized()
         if user != current_user: UserAborts.forbidden()
+
+    @staticmethod
+    def are_very_long_fields(user: User) -> None:
+        """Проверка на слишком длинные поля (name, login)"""
+
+        if len(user.name) > 16: UserAborts.very_long_field("Name")
+        if len(user.login) > 32: UserAborts.very_long_field("Login")

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Edit question{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1 class="content-header-left">Edit question</h1>
+        <form action="" method="post" enctype="multipart/form-data">
+            {{ question_edit_form.hidden_tag() }}
+            <div class="mb-3">
+                <h4><label for="titleField" class="form-label">{{ question_edit_form.name.label }}</label></h4>
+                {{ question_edit_form.name(class="form-control", type="text", id="titleField") }}
+            </div>
+            <div class="mb-3">
+                <h4><label for="tagsField" class="form-label">{{ question_edit_form.tags.label }}</label></h4>
+                {{ question_edit_form.tags(class="form-control", type="text", id="tagsField", placeholder="Specify the tags separated by the ', ' symbol...") }}
+            </div>
+            <div class="mb-3">
+                <h4><label for="contentTextArea" class="form-label">{{ question_edit_form.content.label }}</label></h4>
+                {{ question_edit_form.content(class="form-control", id="contentTextArea", rows="5") }}
+            </div>
+            <div class="mb-3">
+                <h4><label for="imageFormFile" class="form-label">{{ question_edit_form.image.label }}</label></h4>
+                <div class="d-inline-flex gap-1">
+                    {{ question_edit_form.image(class="form-control", type="file", id="imageFormFile", accept=".jpg,.jpeg,.png,.webp") }}
+                    {% if question["image"] %}
+                        <a type="button" class="btn btn-danger" href="{{ url_for('question.delete_image', question_id=question['id']) }}" style="width: 200px;">
+                            Delete Image
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {{ question_edit_form.submit(type="submit", class="btn btn-primary") }}
+        </form>
+    </div>
+{% endblock %}

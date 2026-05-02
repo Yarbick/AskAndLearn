@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}{{ question["name"] if question else "Not found" }}{% endblock %}
+
+{% block content %}
+    {% if question %}
+        <div>
+            <div class="content-container">
+                <div>
+                    {% if question["is_solved"] %}
+                        <div class="alert alert-success" role="alert">
+                            The question was solved
+                        </div>
+                    {% endif %}
+                    {% if question["is_closed"] %}
+                        <div class="alert alert-danger" role="alert">
+                            The question was closed
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="row g-0 gap-4">
+                    <div class="card text-bg-light col-9">
+                        <h2 class="card-header">{{ question["name"] }}</h2>
+                        <div class="card-body">
+                            {% if question["content"] %}
+                                <p class="card-text">{{ question["content"] }}</p>
+                            {% else %}
+                                <p class="card-text">The question has no content</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="content-sub-container col">
+                        {% if question_creator %}
+                            <div class="row g-0">
+                                <a class="user-name col-8" href="{{ url_for('user.view', user_id=question_creator['id']) }}">
+                                    {% if question_creator["icon"] %}
+                                        <img src="{{ url_for('user.static', filename='users_icons/' + question_creator['icon']) }}"
+                                             class="user-icon">
+                                    {% else %}
+                                        <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
+                                             class="user-icon">
+                                    {% endif %}
+                                    {{ question_creator["name"] }}
+                                </a>
+                            </div>
+                        {% else %}
+                            <p class="user-name">Deleted user</p>
+                        {% endif %}
+                        {% if question["tags"] %}
+                            <p class="sub-text mt-3">Created: {{ question["date_added"].split()[0] }}</p>
+                            {% if question["tags"] %}
+                                <h4 class="mt-3">Tags</h4>
+                                <div style="line-height: 2.2;">
+                                    {% for tag in question["tags"] %}
+                                        <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                            {{ tag["name"] }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        {% if current_user and current_user.is_authenticated and question_creator and current_user.id == question_creator["id"] %}
+                            <div class="mt-4">
+                                <a class="btn btn-secondary col" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasQuestionManage" aria-controls="offcanvasQuestionManage">
+                                    Settings
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if question["image"] %}
+                    <img src="{{ url_for('question.static', filename='questions_images/' + question['image']) }}" class="img-thumbnail mt-3" alt="Download error">
+                {% endif %}
+            </div>
+            <div class="content-container mt-4">
+                <div class="d-flex gap-3">
+                    <h1 class="content-header-left">Comments</h1>
+                    {% if current_user and current_user.is_authenticated %}
+                        <a class="btn btn-dark mt-2 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCreateComment" aria-expanded="false" aria-controls="collapseCreateComment">
+                            Post comment
+                        </a>
+                    {% else %}
+                        <a class="btn btn-success mt-2 mb-2" type="button" href="{{ url_for('auth.register') }}">
+                            Register to post comments
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="collapse mt-3" id="collapseCreateComment">
+                    <div class="content-sub-container">
+                        <form action="" method="post">
+                            {{ comment_create_form.hidden_tag() }}
+                            <div class="mb-3">
+                                <h4><label for="contentCreateTextArea" class="form-label">{{ comment_create_form.content.label }}</label></h4>
+                                {{ comment_create_form.content(class="form-control", id="contentCreateTextArea", rows="4") }}
+                            </div>
+                            {{ comment_create_form.submit(type="submit", class="btn btn-primary") }}
+                        </form>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <div class="content-sub-container mt-3">
+                                {% if comment["is_useful"] %}
+                                    <div class="alert alert-success" role="alert">
+                                        The author marked this comment as the correct answer
+                                    </div>
+                                {% endif %}
+                                <div class="d-flex gap-4">
+                                    {% if comment["creator"] %}
+                                        <a class="user-name" href="{{ url_for('user.view', user_id=comment['creator']['id']) }}">
+                                            {% if comment["creator"]["icon"] %}
+                                                <img src="{{ url_for('user.static', filename='users_icons/' + comment['creator']['icon']) }}"
+                                                     class="user-icon">
+                                            {% else %}
+                                                <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
+                                                     class="user-icon">
+                                            {% endif %}
+                                            {{ comment["creator"]["name"] }}
+                                        </a>
+                                    {% else %}
+                                        <p class="user-name">Deleted user</p>
+                                    {% endif %}
+                                    <p class="sub-text">Created: {{ comment["date_added"] }}</p>
+                                    {% if comment['is_changed'] %}
+                                        <p class="sub-text">*Changed</p>
+                                    {% endif %}
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <div>
+                                            {% if current_user and current_user.is_authenticated and current_user.id == comment["creator"]["id"] %}
+                                                <a class="btn btn-primary" type="button" href="{{ url_for('comment.edit', comment_id=comment['id']) }}">
+                                                    Edit
+                                                </a>
+                                                <a type="button" class="btn btn-danger" href="{{ url_for('comment.delete', comment_id=comment['id'], next=request.url) }}">
+                                                    Delete
+                                                </a>
+                                            {% endif %}
+                                            {% if current_user and current_user.is_authenticated and current_user.id == question["creator_id"] %}
+                                                {% if comment["is_useful"] %}
+                                                    <a type="button" class="btn btn-danger" href="{{ url_for('comment.set_useful', comment_id=comment['id'], useful_status='false', next=request.url) }}">
+                                                        Delete mark
+                                                    </a>
+                                                {% else %}
+                                                    <a type="button" class="btn btn-success" href="{{ url_for('comment.set_useful', comment_id=comment['id'], useful_status='true', next=request.url) }}">
+                                                        Mark as useful
+                                                    </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <textarea class="form-control" rows="6" readonly>{{ comment["content"] }}</textarea>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <h1 class="content-sub-container small-error-message">No one answered the question, be the first!</h1>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasQuestionManage" aria-labelledby="offcanvasQuestionManageLabel">
+                <div class="offcanvas-header">
+                    <h3 class="offcanvas-title" id="offcanvasQuestionManageLabel">Manage question</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div>
+                        <h4>Editing</h4>
+                        <div>
+                            <a type="button" class="btn btn-primary" href="{{ url_for('question.edit', question_id=question['id']) }}">
+                                Edit question
+                            </a>
+                            {% if question["is_solved"] %}
+                                <a type="button" class="btn btn-danger" href="{{ url_for('question.set_solved', question_id=question['id'], solved_status='false') }}">
+                                    Set unsolved
+                                </a>
+                            {% else %}
+                                <a type="button" class="btn btn-success" href="{{ url_for('question.set_solved', question_id=question['id'], solved_status='true') }}">
+                                    Set solved
+                                </a>
+                            {% endif %}
+                            {% if question["is_closed"] %}
+                                <a type="button" class="btn btn-success" href="{{ url_for('question.set_closed', question_id=question['id'], closed_status='false') }}">
+                                    Open
+                                </a>
+                            {% else %}
+                                <a type="button" class="btn btn-danger" href="{{ url_for('question.set_closed', question_id=question['id'], closed_status='true') }}">
+                                    Close
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-5">
+                        <h4>Deleting</h4>
+                        <div class="alert alert-danger">
+                            <h4 class="alert-heading">Warning!</h4>
+                            This action is irreversible.
+                        </div>
+                        <div>
+                            <a type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                Delete question
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Are you sure?</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <a type="button" class="btn btn-danger" href="{{ url_for('question.delete', question_id=question['id']) }}">
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="content-container">
+            <h1 class="error-message">Question not found</h1>
+        </div>
+    {% endif %}
+{% endblock %}

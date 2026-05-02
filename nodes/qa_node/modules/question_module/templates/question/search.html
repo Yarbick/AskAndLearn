@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Question Search{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1 class="content-header-left">Question Search</h1>
+        <form class="d-flex mt-4" method="post">
+            {{ search_form.hidden_tag() }}
+            {{ search_form.search(class="form-control me-2", type="search", placeholder="Search") }}
+            {{ search_form.submit(class="btn btn-success", type="submit") }}
+        </form>
+        <div class="content-sub-container mt-3">
+            {% if found_questions %}
+                <div class="list-group">
+                    {% for question in found_questions %}
+                        <div class="list-group-item list-group-item-action list-item-word-wrap">
+                            <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
+                                {{ question["name"] }}
+                            </a>
+                            <div style="line-height: 2.2;">
+                                {% for tag in question["tags"] %}
+                                    <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                        {{ tag["name"] }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <h1 class="small-error-message">Nothing was found for your query</h1>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

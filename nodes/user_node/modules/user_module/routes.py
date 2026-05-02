@@ -8,6 +8,9 @@ from flask_login import current_user, login_required
 from security.csrf import create_csrf_request_session
 from security.file import Image
 
+# Обработка ошибок
+from exceptions.api.rest.shared import ResponseErrorHandler
+
 # Подключение к модулю
 from .blueprint import bp
 
@@ -21,9 +24,9 @@ import requests
 from os import remove as remove_file
 
 # Формы
-from .forms.edit import EditForm
-from .forms.delete import DeleteForm
-from .forms.search import SearchForm
+from .forms.user.edit import EditForm
+from .forms.user.delete import DeleteForm
+from .forms.user.search import SearchForm
 
 
 @bp.route("/<int:user_id>/view", methods=["GET"])
@@ -46,7 +49,7 @@ def view(user_id: int):
 
     # Отображение страницы (GET)
     return render_template(
-        "view.html",
+        "user/view.html",
         displayed_user=displayed_user,
         friendship=friendship
     )
@@ -120,7 +123,7 @@ def edit():
 
     # Отображение страницы (GET)
     return render_template(
-        "edit.html",
+        "user/edit.html",
         edit_form=edit_form
     )
 
@@ -176,7 +179,7 @@ def delete():
 
     # Отображение страницы (GET)
     return render_template(
-        "delete.html",
+        "user/delete.html",
         delete_form=delete_form
     )
 
@@ -256,7 +259,7 @@ def search():
 
             # Отображение страницы (GET)
             return render_template(
-                "search.html",
+                "user/search.html",
                 search_form=search_form,
                 found_users=found_users
             )
@@ -266,6 +269,6 @@ def search():
 
     # Отображение страницы без данных для поиска (GET)
     return render_template(
-        "search.html",
+        "user/search.html",
         search_form=search_form
     )

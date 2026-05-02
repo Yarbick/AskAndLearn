@@ -1,10 +1,14 @@
 """REST API ресурсы"""
 
 # Работа с фреймворком
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
 
 # Работа с REST API
+import requests
 from flask_restful import Resource
+
+# Безопасность
+from security.csrf import create_csrf_request_session
 
 # Парсеры
 from .parsers import UserParsers
@@ -15,7 +19,6 @@ from .validators import UserAborts, UserValidators
 # Работа с ORM
 from user_node import db_manager
 from user_node.data.models.user import User
-from sqlalchemy.exc import IntegrityError
 
 
 class UserResource(Resource):
@@ -38,23 +41,20 @@ class UserResource(Resource):
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
-            try:
-                # Получение пользователя из БД
-                user: User = db_session.get(User, user_id)
-                # Проверки
-                UserValidators.is_exists(user)
-                UserValidators.is_available(user)
+            # Получение пользователя из БД
+            user: User = db_session.get(User, user_id)
+            # Проверки
+            UserValidators.is_exists(user)
+            UserValidators.is_available(user)
+            UserValidators.are_very_long_fields(user)
 
-                # Изменение пользователя
-                for field_name, value in user_data.items():
-                    if value is not None: setattr(user, field_name, value)
-                if user_password: user.set_password(user_password)
+            # Изменение пользователя
+            for field_name, value in user_data.items():
+                if value is not None: setattr(user, field_name, value)
+            if user_password: user.set_password(user_password)
 
-                # Сохранение изменений
-                db_session.commit()
-            except IntegrityError:
-                # Вызов ошибки, если пользователь с указанным логином уже существует
-                UserAborts.login_exist()
+            # Сохранение изменений
+            db_session.commit()
 
             # Вывод результата
             return jsonify({"success": "OK"})
@@ -71,6 +71,25 @@ class UserResource(Resource):
             # Удаление связей с другими пользователями
             for friendship in set(user.friendships_as_user).union(user.friendships_as_friend):
                 db_session.delete(friendship)
+
+            # Удаление связей с вопросами и комментариями через REST API
+            # Подготовка данных
+            server_address = f"{request.scheme}://{request.host}"
+            request_session: requests.Session = create_csrf_request_session(server_address)
+            json_params = {
+                "creator_id": user_id
+            }
+            # Запросы
+            request_session.patch(
+                f"{server_address}/api/v1/questions",
+                json=json_params,
+                cookies=request.cookies
+            )  # Удаление связей с вопросами
+            request_session.patch(
+                f"{server_address}/api/v1/comments",
+                json=json_params,
+                cookies=request.cookies
+            )  # Удаление связей с комментариями
 
             # Удаление пользователя
             db_session.delete(user)
@@ -108,19 +127,20 @@ class UserListResource(Resource):
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
-            try:
-                # Создание пользователя
-                user = User()
-                for field_name, value in user_data.items():
-                    setattr(user, field_name, value)
-                user.set_password(user_password)
+            # Проверки
+            if db_session.query(User).filter(User.login == user_data["login"]).first(): UserAborts.login_exist()
 
-                # Добавление объекта в БД
-                db_session.add(user)
-                db_session.commit()
-            except IntegrityError:
-                # Вызов ошибки, если пользователь с указанным логином уже существует
-                UserAborts.login_exist()
+            # Создание пользователя
+            user = User()
+            for field_name, value in user_data.items():
+                setattr(user, field_name, value)
+            user.set_password(user_password)
+            # Проверки
+            UserValidators.are_very_long_fields(user)
+
+            # Добавление объекта в БД
+            db_session.add(user)
+            db_session.commit()
 
             # Вывод результата
             return make_response(jsonify({"id": user.id}), 201)
