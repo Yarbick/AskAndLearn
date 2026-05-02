@@ -45,6 +45,7 @@ from nodes.user_node.modules.friendship_module import bp as friendship_bp, api_b
 # Узел qa_node
 from nodes.qa_node.modules.question_module import bp as question_bp, api_bp as question_api_bp
 from nodes.qa_node.modules.comment_module import bp as comment_bp, api_bp as comment_api_bp
+from nodes.qa_node.modules.favorite_module import bp as favorite_bp
 
 # Регистрация модулей
 # Узел welcome_node
@@ -60,3 +61,4 @@ app.register_blueprint(question_bp)
 app.register_blueprint(question_api_bp)
 app.register_blueprint(comment_bp)
 app.register_blueprint(comment_api_bp)
+app.register_blueprint(favorite_bp)
