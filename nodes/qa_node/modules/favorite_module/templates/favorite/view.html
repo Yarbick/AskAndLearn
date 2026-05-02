@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Favorites{% endblock %}
+
+{% block content %}
+    <div class="content-container">
+        <h1 class="content-header-left">Favorites</h1>
+        {% if not error_message and error_message != "" %}
+            {% if favorites %}
+                <div class="list-group mt-4">
+                    {% for favorite in favorites %}
+                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <a href="{{ url_for('question.view', question_id=favorite['question']['id'])}}">
+                                {{ favorite["question"]["name"] }}
+                            </a>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a type="button" class="btn btn-danger" href="{{ url_for('favorite.delete', favorite_id=favorite['id'], next=request.url) }}">
+                                    Delete
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <h1 class="content-sub-container small-error-message mt-4">You don't have any favorite questions</h1>
+            {% endif %}
+        {% else %}
+            <h1 class="content-sub-container small-error-message mt-4">{{ error_message }}</h1>
+        {% endif %}
+    </div>
+{% endblock %}
