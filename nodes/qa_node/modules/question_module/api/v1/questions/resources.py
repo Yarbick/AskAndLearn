@@ -7,6 +7,9 @@ from flask import jsonify, make_response
 import requests
 from flask_restful import Resource
 
+# Безопасность
+from security.rate_limiter import api_route_limits
+
 # Парсеры
 from .parsers import QuestionParsers
 
@@ -23,6 +26,9 @@ from nodes.qa_node.data.models.tag import Tag
 
 class QuestionResource(Resource):
     """Ресурс одного вопроса"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self, question_id: int) -> requests.Response:
         """GET запрос для получения данных о вопросе"""
@@ -137,6 +143,9 @@ class QuestionResource(Resource):
 
 class QuestionListResource(Resource):
     """Ресурс списка вопросов"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self) -> requests.Response:
         """GET запрос для получения данных о вопросах"""

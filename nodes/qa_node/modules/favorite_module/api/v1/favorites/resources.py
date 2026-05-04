@@ -7,6 +7,9 @@ from flask import jsonify, make_response
 import requests
 from flask_restful import Resource
 
+# Безопасность
+from security.rate_limiter import api_route_limits
+
 # Парсеры
 from .parsers import FavoriteParsers
 
@@ -21,6 +24,9 @@ from nodes.qa_node.data.models.question import Question
 
 class FavoriteResource(Resource):
     """Ресурс одного избранного вопроса"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self, favorite_id: int) -> requests.Response:
         """GET запрос для получения данных об избранном вопросе"""
@@ -57,6 +63,9 @@ class FavoriteResource(Resource):
 
 class FavoriteListResource(Resource):
     """Ресурс списка избранных вопросов"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self) -> requests.Response:
         """GET запрос для получения избранных"""

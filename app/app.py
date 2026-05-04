@@ -8,6 +8,7 @@ from flask_login import LoginManager
 
 # Безопасность
 from flask_wtf import CSRFProtect
+from security.rate_limiter import limiter
 
 # Настройки приложения
 from .config import Config
@@ -31,8 +32,11 @@ app.config['WTF_CSRF_ENABLED'] = Config.WTF_CSRF_ENABLED
 app.config['WTF_CSRF_CHECK_DEFAULT'] = Config.WTF_CSRF_CHECK_DEFAULT
 app.config['WTF_CSRF_HEADERS'] = Config.WTF_CSRF_HEADERS
 
-# Инициализация CSRF-защиты
+# Создание CSRF-защиты
 csrf_protect: CSRFProtect = CSRFProtect(app)
+
+# Инициализация лимитера
+limiter.init_app(app)
 
 # Создание login-менеджера
 login_manager: LoginManager = LoginManager()

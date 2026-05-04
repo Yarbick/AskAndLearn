@@ -7,6 +7,9 @@ from flask import jsonify, make_response
 import requests
 from flask_restful import Resource
 
+# Безопасность
+from security.rate_limiter import api_route_limits
+
 # Парсеры
 from .parsers import CommentParsers
 
@@ -23,6 +26,9 @@ from nodes.qa_node.data.models.question import Question
 
 class CommentResource(Resource):
     """Ресурс одного комментария"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self, comment_id: int) -> requests.Response:
         """GET запрос для получения данных о комментарии"""
@@ -110,6 +116,9 @@ class CommentResource(Resource):
 
 class CommentListResource(Resource):
     """Ресурс списка комментариев"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self) -> requests.Response:
         """GET запрос для получения данных о комментариях"""

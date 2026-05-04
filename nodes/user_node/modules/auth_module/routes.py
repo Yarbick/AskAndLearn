@@ -11,6 +11,7 @@ from .blueprint import bp
 
 # Безопасность
 from security.csrf import create_csrf_request_session
+from security.rate_limiter import limiter
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -29,6 +30,7 @@ from nodes.user_node.data.models.user import User
 
 
 @bp.route("/register", methods=["GET", "POST"])
+@limiter.limit("5 per minute")
 def register():
     """Регистрация"""
 
@@ -85,6 +87,7 @@ def register():
 
 
 @bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute")
 def login():
     """Авторизация"""
 
@@ -135,6 +138,7 @@ def logout():
 
 @bp.route("/change_password", methods=["GET", "POST"])
 @login_required
+@limiter.limit("5 per minute")
 def change_password():
     """Изменение пароля"""
 

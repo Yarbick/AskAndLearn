@@ -9,6 +9,7 @@ from flask_restful import Resource
 
 # Безопасность
 from security.csrf import create_csrf_request_session
+from security.rate_limiter import api_route_limits
 
 # Парсеры
 from .parsers import UserParsers
@@ -23,6 +24,9 @@ from nodes.user_node.data.models.user import User
 
 class UserResource(Resource):
     """Ресурс одного пользователя"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self, user_id: int) -> requests.Response:
         """GET запрос для получения данных пользователя"""
@@ -124,6 +128,9 @@ class UserResource(Resource):
 
 class UserListResource(Resource):
     """Ресурс списка пользователей"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self) -> requests.Response:
         """GET запрос для получения данных пользователей"""

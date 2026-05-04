@@ -7,6 +7,9 @@ from flask import jsonify, make_response
 import requests
 from flask_restful import Resource
 
+# Безопасность
+from security.rate_limiter import api_route_limits
+
 # Парсеры
 from .parsers import FriendshipParsers
 
@@ -21,6 +24,9 @@ from nodes.user_node.data.models.friendship import Friendship
 
 class FriendshipResource(Resource):
     """Ресурс одной дружбы"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self, user_id: int, friend_id: int) -> requests.Response:
         """GET запрос для получения данных о дружбе"""
@@ -93,6 +99,9 @@ class FriendshipResource(Resource):
 
 class FriendshipListResource(Resource):
     """Ресурс списка друзей у пользователя"""
+
+    # Декораторы
+    decorators = api_route_limits.copy()
 
     def get(self, user_id: int) -> requests.Response:
         """GET запрос для получения данных о дружбах пользователя"""
