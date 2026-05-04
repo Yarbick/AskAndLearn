@@ -1,4 +1,4 @@
-"""Модель дружбы"""
+"""ORM модель дружбы"""
 
 # Работа с ORM
 import sqlalchemy as sa
@@ -9,7 +9,7 @@ from sqlalchemy_serializer import SerializerMixin
 
 
 class Friendship(SerializerMixin, db_manager.declarative_base):
-    """Модель дружбы"""
+    """ORM модель дружбы"""
 
     __tablename__ = "friendship"
 
@@ -21,5 +21,11 @@ class Friendship(SerializerMixin, db_manager.declarative_base):
     status = sa.Column("status", sa.String, nullable=False)
 
     # Связь с моделями
-    user = orm.relationship("User", foreign_keys=[user_id])
-    friend = orm.relationship("User", foreign_keys=[friend_id])
+    user = orm.relationship(
+        "User",
+        foreign_keys=[user_id]
+    )
+    friend = orm.relationship(
+        "User",
+        foreign_keys=[friend_id]
+    )

@@ -1,7 +1,9 @@
-"""Обработчики маршрутов модуля Question"""
+"""Обработчики маршрутов модуля"""
 
 # Работа с фреймворком
 from flask import render_template, url_for, redirect, request, flash, session as flask_session
+
+# Работа с пользователем
 from flask_login import current_user, login_required
 
 # Безопасность
@@ -21,6 +23,7 @@ from .config import Config
 import requests
 
 # Работа с файлами
+from werkzeug.datastructures import FileStorage
 from os import remove as remove_file
 
 # Формы для вопросов
@@ -37,11 +40,11 @@ def home():
     """Главное меню модуля"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
 
     # Получение новейших вопросов через REST API
     # Подготовка данных
-    json_params = {
+    json_params: dict = {
         "limit": 5
     }
     # Запрос
@@ -51,15 +54,18 @@ def home():
     )
 
     # Обработка запроса
-    newest_questions: list = response.json()["questions"] if response else []
+    # Получение новейших вопросов
+    newest_questions: list[dict] = response.json()["questions"] if response else []
 
     # Получение последних посещённых запросов из cookie-сессий
-    last_questions: list = []
-    last_questions_ids: list = flask_session.get("last_questions", [])
+    last_questions: list[dict] = []
+    last_questions_ids: list[int] = flask_session.get("last_questions", [])
     for question_id in last_questions_ids:
         # Получение вопроса через REST API
         # Запрос
-        response: requests.Response = requests.get(f"{server_address}/api/v1/questions/{question_id}")
+        response: requests.Response = requests.get(
+            f"{server_address}/api/v1/questions/{question_id}"
+        )
 
         # Обработка запроса
         if response:
@@ -69,9 +75,9 @@ def home():
 
     # Получение вопросов, созданных пользователем, через REST API
     # Подготовка данных
-    json_params = {
-        "search": int(current_user.id),
-        "search_mode": "creator"
+    json_params: dict = {
+        "filter": int(current_user.id),
+        "filter_mode": "creator"
     }
     # Запрос
     response: requests.Response = requests.get(
@@ -80,8 +86,10 @@ def home():
     )
 
     # Обработка запроса
+    # Получение вопросов, созданных пользователем
     your_questions: list = response.json()["questions"] if response else []
 
+    # Отображение страницы (GET)
     return render_template(
         "question/home.html",
         newest_questions=newest_questions,
@@ -92,20 +100,20 @@ def home():
 
 @bp.route("/<int:question_id>/view", methods=["GET", "POST"])
 def view(question_id: int):
-    """Просмотр вопроса"""
+    """Просмотр вопроса и создание комментариев"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для создания комментария
-    comment_create_form = CommentCreateForm()
+    comment_create_form: CommentCreateForm = CommentCreateForm()
 
     # Создание комментария (POST)
     if comment_create_form.validate_on_submit():
         # Создание комментария через REST API
         # Подготовка данных
-        json_params = {
+        json_params: dict = {
             "content": comment_create_form.content.data,
             "creator_id": current_user.id,
             "question_id": question_id
@@ -133,7 +141,7 @@ def view(question_id: int):
     response: requests.Response = request_session.get(f"{server_address}/api/v1/questions/{question_id}")
 
     # Обработка запроса
-    question = None
+    question: dict | None = None
     if response:
         question = response.json()["question"]
 
@@ -142,7 +150,7 @@ def view(question_id: int):
             # Получение cookie-сессии последних вопросов
             if not flask_session.get("last_questions", None):  # Создаём список, если сессии не существует
                 flask_session["last_questions"] = []
-            last_question: list = flask_session["last_questions"]
+            last_question: list[int] = flask_session["last_questions"]
 
             # Добавление вопроса в список
             if question_id not in last_question:  # Если не существует, то просто добавляем
@@ -153,9 +161,16 @@ def view(question_id: int):
             flask_session.permanent = True
 
     # Получение данных об авторе вопроса
-    question_creator = None
+    question_creator: dict | None = None
     if question and question["creator_id"]:
-        response: requests.Response = request_session.get(f"{server_address}/api/v1/users/{question["creator_id"]}")
+        # Получение данных об авторе вопроса через REST API
+        # Запрос
+        response: requests.Response = request_session.get(
+            f"{server_address}/api/v1/users/{question["creator_id"]}"
+        )
+
+        # Обработка данных
+        # Получение автора
         question_creator = response.json()["user"] if response else None
 
     # Получение данных о комментариях на вопрос
@@ -163,10 +178,10 @@ def view(question_id: int):
     if question:
         # Получение комментариев через REST API
         # Подготовка данных
-        json_params = {
+        json_params: dict = {
             "sort_mode": "new",
-            "search": str(question_id),
-            "search_mode": "question"
+            "filter": str(question_id),
+            "filter_mode": "question"
         }
         # Запрос
         response: requests.Response = request_session.get(
@@ -177,10 +192,10 @@ def view(question_id: int):
         # Обработка запроса
         if response:
             # Получение комментариев
-            comments: list[dict] = response.json()["comments"]
+            comments = response.json()["comments"]
 
             # Получение информации об авторах комментариев
-            creators_cash = {}  # Сохраняем пользователей, чтобы не повторять запросы
+            creators_cash: dict = {}  # Сохраняем пользователей, чтобы не повторять запросы
             for comment in comments:
                 if not comment["creator_id"] and comment["creator_id"] != 0:
                     comment["creator"] = None
@@ -194,7 +209,9 @@ def view(question_id: int):
                     )
 
                     # Обработка запроса
+                    # Получение данных о пользователе
                     creator = response.json()["user"] if response else None
+                    # Добавление пользователя в кеш и список
                     creators_cash[comment["creator_id"]] = creator
                     comment["creator"] = creator
 
@@ -203,9 +220,9 @@ def view(question_id: int):
     if question:
         # Получение данных об избранных через REST API
         # Подготовка данных
-        json_params = {
-            "search": question["id"],
-            "search_mode": "question"
+        json_params: dict = {
+            "filter": question["id"],
+            "filter_mode": "question"
         }
         # Запрос
         response: requests.Response = request_session.get(
@@ -234,11 +251,11 @@ def create():
     """Создание вопроса"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для создания вопроса
-    question_create_form = QuestionCreateForm()
+    question_create_form: QuestionCreateForm = QuestionCreateForm()
 
     # Процесс создания формы (POST)
     if question_create_form.validate_on_submit():
@@ -246,22 +263,23 @@ def create():
         image: FileStorage = question_create_form.image.data
         if image:
             # Проверка на безопасность
-            correct_extensions = question_create_form.image.validators[0].upload_set
+            correct_extensions: list[str] = question_create_form.image.validators[0].upload_set
             is_safe, reason, secured_filename = Image.full_check(image.filename, correct_extensions, image.stream)
 
             if is_safe:
                 # Составление имени файла
-                file_extension = secured_filename.split(".")[-1]
-                filename = Image.full_clearing_filename(
+                file_extension: str = secured_filename.split(".")[-1]
+                filename: str = Image.full_clearing_filename(
                     f"{current_user.id}_{current_user.login}_{question_create_form.name.data}.{file_extension}"
                 )
             else:
+                # Обработка ошибок
                 flash(reason, "error")
                 return redirect(url_for("question.create"))
 
         # Создание вопроса через REST API
         # Подготовка данных
-        json_params = {
+        json_params: dict = {
             "name": question_create_form.name.data,
             "creator_id": current_user.id,
             "tags": question_create_form.tags.data.strip(),
@@ -278,8 +296,7 @@ def create():
         # Обработка запроса
         if response:
             # Сохранение изображения
-            if image:
-                image.save(f"{Config.static_url_path}/questions_images/{filename}")
+            if image: image.save(f"{Config.STATIC_URL_PATH}/questions_images/{filename}")
 
             # Вывод сообщения
             flash("The question has been created", "info")
@@ -306,11 +323,11 @@ def edit(question_id: int):
     """Редактирование вопроса"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для изменения вопроса
-    question_edit_form = QuestionEditForm()
+    question_edit_form: QuestionEditForm = QuestionEditForm()
 
     # Получение данных о вопросе через REST API
     # Запрос
@@ -319,7 +336,7 @@ def edit(question_id: int):
     # Обработка запроса
     if response:
         # Получение данных о вопросе
-        question = response.json()["question"]
+        question: dict = response.json()["question"]
 
         # Процесс редактирования вопроса (POST)
         if question_edit_form.validate_on_submit():
@@ -327,22 +344,23 @@ def edit(question_id: int):
             image: FileStorage = question_edit_form.image.data
             if image:
                 # Проверка на безопасность
-                correct_extensions = question_edit_form.image.validators[0].upload_set
+                correct_extensions: str = question_edit_form.image.validators[0].upload_set
                 is_safe, reason, secured_filename = Image.full_check(image.filename, correct_extensions, image.stream)
 
                 if is_safe:
                     # Составление имени файла
-                    file_extension = secured_filename.split(".")[-1]
-                    filename = Image.full_clearing_filename(
+                    file_extension: str = secured_filename.split(".")[-1]
+                    filename: str = Image.full_clearing_filename(
                         f"{current_user.id}_{current_user.login}_{question_edit_form.name.data}.{file_extension}"
                     )
                 else:
+                    # Обработка ошибок
                     flash(reason, "error")
                     return redirect(url_for("question.edit", question_id=question_id))
 
             # Редактирование вопроса через REST API
             # Подготовка данных
-            json_params = {
+            json_params: dict = {
                 "name": question_edit_form.name.data,
                 "tags": question_edit_form.tags.data.strip(),
                 "content": question_edit_form.content.data.strip()
@@ -360,9 +378,9 @@ def edit(question_id: int):
                 if image:
                     # Удаление старого изображения
                     if question["image"]:
-                        remove_file(f"{Config.static_url_path}/questions_images/{question["image"]}")
+                        remove_file(f"{Config.STATIC_URL_PATH}/questions_images/{question["image"]}")
                     # Сохранение изображения
-                    image.save(f"{Config.static_url_path}/questions_images/{filename}")
+                    image.save(f"{Config.STATIC_URL_PATH}/questions_images/{filename}")
 
                 # Вывод сообщения
                 flash("The question has been edited", "info")
@@ -398,7 +416,7 @@ def delete(question_id: int):
     """Удаление вопроса"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Получение данных о вопросе через REST API
@@ -408,7 +426,7 @@ def delete(question_id: int):
     # Обработка запроса
     if response:
         # Получение данных о вопросе
-        question = response.json()["question"]
+        question: dict = response.json()["question"]
 
         # Удаление вопроса через REST API
         # Запрос
@@ -420,8 +438,7 @@ def delete(question_id: int):
         # Обработка запроса
         if response:
             # Удаление изображения
-            if question["image"]:
-                remove_file(f"{Config.static_url_path}/questions_images/{question["image"]}")
+            if question["image"]: remove_file(f"{Config.STATIC_URL_PATH}/questions_images/{question["image"]}")
 
             # Вывод сообщения
             flash("Question deleted", "info")
@@ -446,7 +463,7 @@ def delete_image(question_id: int):
     """Удаление изображения вопроса"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Получение данных о вопросе через REST API
@@ -456,12 +473,12 @@ def delete_image(question_id: int):
     # Обработка запроса
     if response:
         # Получение данных о вопросе
-        question = response.json()["question"]
+        question: dict = response.json()["question"]
 
         if question["image"]:
             # Удаление названия изображения вопроса через REST API
             # Подготовка данных
-            json_params = {
+            json_params: dict = {
                 "image": ""
             }
             # Запрос
@@ -474,7 +491,7 @@ def delete_image(question_id: int):
             # Обработка запроса
             if response:
                 # Удаление изображения
-                remove_file(f"{Config.static_url_path}/questions_images/{question["image"]}")
+                remove_file(f"{Config.STATIC_URL_PATH}/questions_images/{question["image"]}")
 
                 # Вывод сообщения
                 flash("The question image has been deleted", "info")
@@ -496,12 +513,12 @@ def set_solved(question_id: int, solved_status: str):
     """Изменение состояния is_solved"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Изменение состояния is_solved через REST API
     # Подготовка данных
-    json_params = {
+    json_params: dict = {
         "is_solved": solved_status == "true"
     }
     # Запрос
@@ -527,12 +544,12 @@ def set_closed(question_id: int, closed_status: str):
     """Изменение состояния is_closed"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Изменение состояния is_closed через REST API
     # Подготовка данных
-    json_params = {
+    json_params: dict = {
         "is_closed": closed_status == "true"
     }
     # Запрос
@@ -557,27 +574,28 @@ def search():
     """Поиск вопросов"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
 
     # Форма для поиска
-    search_form = QuestionSearchForm()
+    search_form: QuestionSearchForm = QuestionSearchForm()
 
     # Запрос на поиск через форму (POST)
     if search_form.validate_on_submit():
         # Обновление страницы с параметрами для поиска
         return redirect(url_for(
             "question.search",
-            search=search_form.search.data,
-            search_mode="name"
+            filter=search_form.search.data,
+            filter_mode="name"
         ))
 
     # Процесс поиска (параметры передаётся через параметры ссылки)
-    if request.args.get("search_mode"):
+    found_questions: list[dict] = []
+    if request.args.get("filter_mode"):
         # Поиск вопросов через REST API
         # Подготовка данных
-        json_params = {
-            "search": request.args.get("search"),
-            "search_mode": request.args.get("search_mode")
+        json_params: dict = {
+            "filter": request.args.get("filter"),
+            "filter_mode": request.args.get("filter_mode")
         }
         # Запрос
         response = requests.get(
@@ -587,15 +605,8 @@ def search():
 
         # Обработка запроса
         if response:
-            # Получение данных
+            # Получение найденных вопросов
             found_questions = response.json()["questions"]
-
-            # Отображение страницы (GET)
-            return render_template(
-                "question/search.html",
-                search_form=search_form,
-                found_questions=found_questions
-            )
         else:
             # Обработка ошибок
             ResponseErrorHandler.flash_reason_message(response)
@@ -603,5 +614,6 @@ def search():
     # Отображение страницы без данных для поиска (GET)
     return render_template(
         "question/search.html",
-        search_form=search_form
+        search_form=search_form,
+        found_questions=found_questions
     )

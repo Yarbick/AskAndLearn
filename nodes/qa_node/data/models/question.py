@@ -1,4 +1,4 @@
-"""Модель вопроса"""
+"""ORM модель вопроса"""
 
 # Работа с ORM
 import sqlalchemy as sa
@@ -12,7 +12,7 @@ from datetime import datetime
 
 
 class Question(SerializerMixin, db_manager.declarative_base):
-    """Модель вопроса"""
+    """ORM модель вопроса"""
 
     # Название
     __tablename__ = "question"

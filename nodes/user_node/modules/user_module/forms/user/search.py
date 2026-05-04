@@ -1,4 +1,4 @@
-"""Форма поиска вопросов"""
+"""Форма поиска пользователей"""
 
 # Работа с формами
 from flask_wtf import FlaskForm
@@ -7,7 +7,7 @@ from wtforms.validators import DataRequired
 
 
 class SearchForm(FlaskForm):
-    """Форма поиска вопросов"""
+    """Форма поиска пользователей"""
 
     # Поля
     search = StringField("Search", validators=[DataRequired()])

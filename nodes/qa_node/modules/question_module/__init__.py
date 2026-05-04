@@ -1,6 +1,6 @@
-"""Инициализация модуля Question"""
+"""Инициализация модуля"""
 
-# Создание blueprint
+# Создание Blueprint
 from .blueprint import bp
 # Подключение обработчиков
 from .routes import bp

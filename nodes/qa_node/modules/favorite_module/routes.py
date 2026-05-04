@@ -1,7 +1,9 @@
 """Обработчики маршрутов модуля Favorite"""
 
 # Работа с фреймворком
-from flask import render_template, url_for, redirect, request, flash, session as flask_session
+from flask import render_template, url_for, redirect, request, flash
+
+# Работа с пользователем
 from flask_login import current_user, login_required
 
 # Безопасность
@@ -23,13 +25,13 @@ def view():
     """Просмотр избранных вопросов у пользователя"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
 
     # Получение избранных вопросов пользователя через REST API
     # Подготовка данных
-    json_params = {
-        "search": current_user.id,
-        "search_mode": "user"
+    json_params: dict = {
+        "filter": current_user.id,
+        "filter_mode": "user"
     }
     # Запрос
     response: requests.Response = requests.get(
@@ -39,7 +41,8 @@ def view():
 
     # Обработка запроса
     if response:
-        favorites = response.json()["favorites"]
+        # Получение избранных вопросов
+        favorites: dict = response.json()["favorites"]
 
         # Отображение страницы (GET)
         return render_template(
@@ -60,12 +63,12 @@ def create(question_id: int):
     """Добавление вопроса в избранные"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Добавление вопроса в избранные через REST API
     # Подготовка данных
-    json_params = {
+    json_params: dict = {
         "question_id": question_id,
         "user_id": current_user.id
     }
@@ -95,7 +98,7 @@ def delete(favorite_id: int):
     """Удаление вопроса из избранных"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление вопроса из избранных через REST API

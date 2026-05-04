@@ -1,4 +1,4 @@
-"""Модель комментария"""
+"""ORM модель комментария"""
 
 # Работа с ORM
 import sqlalchemy as sa
@@ -12,7 +12,7 @@ from datetime import datetime
 
 
 class Comment(SerializerMixin, db_manager.declarative_base):
-    """Модель комментария"""
+    """ORM модель комментария"""
 
     # Название
     __tablename__ = "comment"

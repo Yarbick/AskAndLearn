@@ -1,13 +1,13 @@
 """Валидаторы для REST API ресурса"""
 
-# Работа с фреймворком
+# Работа с пользователем
 from flask_login import current_user
 
 # Работа с REST API
 from flask_restful import abort
 
 # Работа с ORM
-from qa_node.data.models.question import Question
+from nodes.qa_node.data.models.question import Question
 
 
 class QuestionAborts:
@@ -32,13 +32,13 @@ class QuestionAborts:
         abort(403, error="Forbidden")
 
     @staticmethod
-    def already_exists():
+    def already_exists() -> None:
         """Данный вопрос уже существует у пользователя"""
 
         abort(400, error="The user already has a question with the given title")
 
     @staticmethod
-    def question_closed():
+    def question_closed() -> None:
         """Вопрос закрыт"""
 
         abort(400, error="Question closed")
@@ -48,7 +48,7 @@ class QuestionValidators:
     """Методы для проверки"""
 
     @staticmethod
-    def is_exists(question: Question) -> None:
+    def is_exists(question: Question | None) -> None:
         """Проверка на существование вопроса"""
 
         if not question: QuestionAborts.not_found()

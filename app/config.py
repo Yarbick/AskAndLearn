@@ -22,17 +22,18 @@ class Config:
     load_dotenv(".env")
 
     # Параметры
-    path = dirname(__file__)
-    secret_key = getenv("SECRET_KEY")
-    static_folder = "shared_static"
-    static_url_path = "/"
-    template_folder = join_path(path, "shared_templates")
-    max_content_length = 16 * 1024 * 1024
-    wtf_csrf_enabled = True
-    wtf_csrf_check_default = True
-    wtf_csrf_headers = ['X-CSRFToken']
-    session_cookie_name = "main_session"
-    session_cookie_httponly = True
-    session_cookie_samesite = 'Lax'
-    session_refresh_each_request = True
-    permanent_session_lifetime = timedelta(days=7)
+    PATH: str = dirname(__file__)
+    NAME: str = "AskAndLearn"
+    SECRET_KEY: str = getenv("SECRET_KEY")
+    STATIC_FOLDER: str = "shared/static"
+    STATIC_URL_PATH: str = "/shared/static"
+    TEMPLATE_FOLDER: str = "shared/templates"
+    MAX_CONTENT_LENGTH: int = 16 * 1024 * 1024
+    WTF_CSRF_ENABLED: bool = True
+    WTF_CSRF_CHECK_DEFAULT: bool = True
+    WTF_CSRF_HEADERS: tuple[str] = ("X-CSRFToken",)
+    SESSION_COOKIE_NAME: str = "main_session"
+    SESSION_COOKIE_HTTPONLY: bool = True
+    SESSION_COOKIE_SAMESITE: str = "Lax"
+    SESSION_REFRESH_EACH_REQUEST: bool = True
+    PERMANENT_SESSION_LIFETIME = timedelta(days=7)

@@ -1,13 +1,13 @@
 """Валидаторы для REST API ресурса"""
 
-# Работа с фреймворком
+# Работа с пользователем
 from flask_login import current_user
 
 # Работа с REST API
 from flask_restful import abort
 
 # Работа с ORM
-from user_node.data.models.user import User
+from nodes.user_node.data.models.user import User
 
 
 class UserAborts:
@@ -38,7 +38,7 @@ class UserAborts:
         abort(403, error="Access is denied")
 
     @staticmethod
-    def very_long_field(field_name: str = "Field"):
+    def very_long_field(field_name: str = "Field") -> None:
         """Поле слишком длинное"""
 
         abort(400, error=f"{field_name} is too long")
@@ -48,7 +48,7 @@ class UserValidators:
     """Методы для проверки"""
 
     @staticmethod
-    def is_exists(user: User) -> None:
+    def is_exists(user: User | None) -> None:
         """Проверка на существование пользователя"""
 
         if not user: UserAborts.not_found()

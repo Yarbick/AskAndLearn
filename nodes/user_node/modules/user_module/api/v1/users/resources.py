@@ -17,41 +17,47 @@ from .parsers import UserParsers
 from .validators import UserAborts, UserValidators
 
 # Работа с ORM
-from user_node import db_manager
-from user_node.data.models.user import User
+from nodes.user_node import db_manager
+from nodes.user_node.data.models.user import User
 
 
 class UserResource(Resource):
     """Ресурс одного пользователя"""
 
-    def get(self, user_id: int):
+    def get(self, user_id: int) -> requests.Response:
+        """GET запрос для получения данных пользователя"""
+
         # Получение пользователя из БД
         with db_manager.create_session() as db_session:
-            user: User = db_session.get(User, user_id)
+            user: User | None = db_session.get(User, user_id)
             # Проверки
             UserValidators.is_exists(user)
 
             # Вывод результата
             return jsonify({"user": user.to_dict(only=["id", "name", "login", "password", "description", "icon"])})
 
-    def put(self, user_id: int):
+    def put(self, user_id: int) -> requests.Response:
+        """PUT запрос для изменения пользователя"""
+
         # Получение данных из парсера
-        user_data: dict = UserParsers.put_parser.parse_args()
-        user_password: str = user_data.pop("password", None)
+        parser_data: dict = UserParsers.put_parser.parse_args()
+        user_password: str | None = parser_data.pop("password", None)
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
             # Получение пользователя из БД
-            user: User = db_session.get(User, user_id)
+            user: User | None = db_session.get(User, user_id)
             # Проверки
             UserValidators.is_exists(user)
             UserValidators.is_available(user)
             UserValidators.are_very_long_fields(user)
 
             # Изменение пользователя
-            for field_name, value in user_data.items():
+            for field_name, value in parser_data.items():
                 if value is not None: setattr(user, field_name, value)
-            if user_password: user.set_password(user_password)
+            # Изменение пароля
+            if user_password:
+                user.set_password(user_password)
 
             # Сохранение изменений
             db_session.commit()
@@ -59,11 +65,17 @@ class UserResource(Resource):
             # Вывод результата
             return jsonify({"success": "OK"})
 
-    def delete(self, user_id: int):
+    def delete(self, user_id: int) -> requests.Response:
+        """DELETE запрос для удаления пользователя"""
+
+        # Подготовка данных для REST API
+        server_address: str = f"{request.scheme}://{request.host}"
+        request_session: requests.Session = create_csrf_request_session(server_address)
+
         # Удаление из БД
         with db_manager.create_session() as db_session:
             # Получение пользователя из БД
-            user: User = db_session.get(User, user_id)
+            user: User | None = db_session.get(User, user_id)
             # Проверки
             UserValidators.is_exists(user)
             UserValidators.is_available(user)
@@ -72,13 +84,9 @@ class UserResource(Resource):
             for friendship in set(user.friendships_as_user).union(user.friendships_as_friend):
                 db_session.delete(friendship)
 
-            # Подготовка данных для REST API
-            server_address = f"{request.scheme}://{request.host}"
-            request_session: requests.Session = create_csrf_request_session(server_address)
-
             # Удаление связей с вопросами и комментариями через REST API
             # Подготовка данных
-            json_params = {
+            json_params: dict = {
                 "creator_id": user_id
             }
             # Запросы
@@ -95,9 +103,9 @@ class UserResource(Resource):
 
             # Очистка избранных через REST API
             # Подготовка данных
-            json_params = {
-                "search": user_id,
-                "search_mode": "user"
+            json_params: dict = {
+                "filter": user_id,
+                "filter_mode": "user"
             }
             # Запросы
             request_session.delete(
@@ -117,15 +125,17 @@ class UserResource(Resource):
 class UserListResource(Resource):
     """Ресурс списка пользователей"""
 
-    def get(self):
+    def get(self) -> requests.Response:
+        """GET запрос для получения данных пользователей"""
+
         # Получение данных из парсера
-        filter_params = UserParsers.get_list_parser.parse_args()
+        parser_data: dict = UserParsers.get_list_parser.parse_args()
 
         # Получение пользователей из БД
         with db_manager.create_session() as db_session:
-            if filter_params["search"]:  # С фильтром
-                if not filter_params["search_mode"] or filter_params["search_mode"] == "name-login":  # Фильтр по имени
-                    name_or_login = filter_params["search"]
+            if parser_data["filter"]:  # С фильтром
+                if not parser_data["filter_mode"] or parser_data["filter_mode"] == "name-login":  # Фильтр по имени
+                    name_or_login: str = parser_data["filter"]
                     users: list[User] = db_session.query(User).filter(
                         User.name.ilike(f"%{name_or_login}%") | User.login.ilike(f"%{name_or_login}%")
                     ).all()
@@ -135,20 +145,23 @@ class UserListResource(Resource):
             # Вывод результата
             return jsonify({"users": [user.to_dict(only=["id", "name", "login", "icon"]) for user in users]})
 
-    def post(self):
+    def post(self) -> requests.Response:
+        """POST запрос для создания пользователя"""
+
         # Получение данных из парсера
-        user_data: dict = UserParsers.post_parser.parse_args()
-        user_password: str = user_data.pop("password")
+        parser_data: dict = UserParsers.post_parser.parse_args()
+        user_password: str = parser_data.pop("password")
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
             # Проверки
-            if db_session.query(User).filter(User.login == user_data["login"]).first(): UserAborts.login_exist()
+            if db_session.query(User).filter(User.login == parser_data["login"]).first(): UserAborts.login_exist()
 
             # Создание пользователя
-            user = User()
-            for field_name, value in user_data.items():
+            user: User = User()
+            for field_name, value in parser_data.items():
                 setattr(user, field_name, value)
+            # Создание пароля
             user.set_password(user_password)
             # Проверки
             UserValidators.are_very_long_fields(user)

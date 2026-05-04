@@ -3,8 +3,6 @@
 # Работа с файлами
 import re
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
-from flask_wtf.file import FileAllowed
 
 # Работа с изображениями
 import imghdr
@@ -38,9 +36,9 @@ class File:
         # Очистка имени от недопустимых символов
         cleared_filename: str = File.clear_filename(filename)
         # Обрезание имени файла до допустимых размеров
-        cutted_filename: str = File.cut_filename(filename)
+        cutted_filename: str = File.cut_filename(cleared_filename)
 
-        return cleared_filename
+        return cutted_filename
 
     @staticmethod
     def clear_filename(filename: str) -> str:
