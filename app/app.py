@@ -9,6 +9,8 @@ from flask_login import LoginManager
 # Безопасность
 from flask_wtf import CSRFProtect
 from security.rate_limiter import limiter
+from flask_talisman import Talisman
+from security.talisman import init_talisman
 
 # Настройки приложения
 from .config import Config
@@ -37,6 +39,9 @@ csrf_protect: CSRFProtect = CSRFProtect(app)
 
 # Инициализация лимитера
 limiter.init_app(app)
+
+# Инициализация талисмана
+talisman: Talisman = init_talisman(app)
 
 # Создание login-менеджера
 login_manager: LoginManager = LoginManager()

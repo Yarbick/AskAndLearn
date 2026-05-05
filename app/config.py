@@ -1,8 +1,7 @@
 """Настройки приложения"""
 
-# Работа с переменными окружения
-from os import getenv
-from dotenv import load_dotenv
+# Безопасность
+from os import urandom
 
 # Работа с путями
 from os.path import join as join_path, dirname
@@ -18,13 +17,10 @@ from dataclasses import dataclass
 class Config:
     """Настройки приложения"""
 
-    # Загрузка окружения
-    load_dotenv(".env")
-
     # Параметры
     PATH: str = dirname(__file__)
     NAME: str = "AskAndLearn"
-    SECRET_KEY: str = getenv("SECRET_KEY")
+    SECRET_KEY: str = urandom(32)
     STATIC_FOLDER: str = "shared/static"
     STATIC_URL_PATH: str = "/shared/static"
     TEMPLATE_FOLDER: str = "shared/templates"
