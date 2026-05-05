@@ -17,7 +17,8 @@ from exceptions.api.rest.shared import ResponseErrorHandler
 # Подключение к модулю
 from .blueprint import bp
 
-# Настройки модуля
+# Настройки приложения
+from app.config import get_server_address
 from .config import Config
 
 # Работа с REST API
@@ -38,7 +39,7 @@ def view(user_id: int):
     """Просмотр пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Получение данных о пользователе через REST API
     # Запрос
@@ -76,7 +77,7 @@ def edit():
     """Редактирование пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для редактирования профиля
@@ -159,7 +160,7 @@ def delete():
     """Удаление пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма удаления пользователя
@@ -258,7 +259,7 @@ def search():
     """Поиск пользователей"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Форма для поиска
     search_form: SearchForm = SearchForm()

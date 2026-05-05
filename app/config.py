@@ -6,6 +6,9 @@ from os import urandom
 # Работа с путями
 from os.path import join as join_path, dirname
 
+# Работа с виртуальным окружением
+from os import getenv
+
 # Работа с временем
 from datetime import timedelta
 
@@ -33,3 +36,9 @@ class Config:
     SESSION_COOKIE_SAMESITE: str = "Lax"
     SESSION_REFRESH_EACH_REQUEST: bool = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+
+
+def get_server_address() -> str:
+    """Получение адреса сервера"""
+
+    return getenv("REPL_URL", f"http://127.0.0.1:{getenv("PORT", 5000)}")

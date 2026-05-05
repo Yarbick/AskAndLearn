@@ -9,6 +9,9 @@ from flask_login import login_required, login_user, logout_user, current_user
 # Подключение к модулю
 from .blueprint import bp
 
+# Настройки приложения
+from app.config import get_server_address
+
 # Безопасность
 from security.csrf import create_csrf_request_session
 from security.rate_limiter import limiter
@@ -36,7 +39,7 @@ def register():
     """Регистрация"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для регистрации
@@ -156,7 +159,7 @@ def change_password():
     """Изменение пароля"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для изменения пароля

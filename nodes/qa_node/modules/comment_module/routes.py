@@ -16,6 +16,9 @@ from exceptions.api.rest.shared import ResponseErrorHandler
 # Подключение к модулю
 from .blueprint import bp
 
+# Настройки приложения
+from app.config import get_server_address
+
 # Работа с REST API
 import requests
 
@@ -29,7 +32,7 @@ def edit(comment_id: int):
     """Редактирование комментария"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для редактирования комментария
@@ -91,7 +94,7 @@ def delete(comment_id: id):
     """Удаление комментария"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление комментария через REST API
@@ -120,7 +123,7 @@ def set_useful(comment_id: int, useful_status: str):
     """Изменение состояния is_useful"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Изменение состояния is_closed через REST API

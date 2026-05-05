@@ -4,12 +4,12 @@
 from app import app
 
 # Работа с виртуальным окружением
-from os import environ
+from os import getenv
 
 
 def main():
     # Запуск приложения
-    port: int = environ.get("PORT", 5000)
+    port: int = getenv("PORT", 5000)
     app.run(host="0.0.0.0", port=port)
 
 

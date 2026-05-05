@@ -17,7 +17,8 @@ from exceptions.api.rest.shared import ResponseErrorHandler
 # Подключение к модулю
 from .blueprint import bp
 
-# Настройки модуля
+# Настройки приложения
+from app.config import get_server_address
 from .config import Config
 
 # Работа с REST API
@@ -41,7 +42,7 @@ def home():
     """Главное меню модуля"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Получение новейших вопросов через REST API
     # Подготовка данных
@@ -104,7 +105,7 @@ def view(question_id: int):
     """Просмотр вопроса и создание комментариев"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для создания комментария
@@ -255,7 +256,7 @@ def create():
     """Создание вопроса"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для создания вопроса
@@ -332,7 +333,7 @@ def edit(question_id: int):
     """Редактирование вопроса"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для изменения вопроса
@@ -430,7 +431,7 @@ def delete(question_id: int):
     """Удаление вопроса"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Получение данных о вопросе через REST API
@@ -477,7 +478,7 @@ def delete_image(question_id: int):
     """Удаление изображения вопроса"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Получение данных о вопросе через REST API
@@ -527,7 +528,7 @@ def set_solved(question_id: int, solved_status: str):
     """Изменение состояния is_solved"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Изменение состояния is_solved через REST API
@@ -558,7 +559,7 @@ def set_closed(question_id: int, closed_status: str):
     """Изменение состояния is_closed"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Изменение состояния is_closed через REST API
@@ -588,7 +589,7 @@ def search():
     """Поиск вопросов"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Форма для поиска
     search_form: QuestionSearchForm = QuestionSearchForm()

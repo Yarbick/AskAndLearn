@@ -12,6 +12,9 @@ from security.csrf import create_csrf_request_session
 from security.rate_limiter import api_route_limits
 from security.xss import clean_html
 
+# Настройки приложения
+from app.config import get_server_address
+
 # Парсеры
 from .parsers import UserParsers
 
@@ -74,7 +77,7 @@ class UserResource(Resource):
         """DELETE запрос для удаления пользователя"""
 
         # Подготовка данных для REST API
-        server_address: str = f"{request.scheme}://{request.host}"
+        server_address: str = get_server_address()
         request_session: requests.Session = create_csrf_request_session(server_address)
 
         # Удаление из БД
