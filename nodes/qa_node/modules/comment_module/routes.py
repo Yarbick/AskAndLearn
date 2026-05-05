@@ -8,6 +8,7 @@ from flask_login import login_required
 
 # Безопасность
 from security.csrf import create_csrf_request_session
+from security.xss import clean_html
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -45,10 +46,13 @@ def edit(comment_id: int):
 
         # Редактирование комментария (POST)
         if comment_edit_form.validate_on_submit():
+            # Чтение данных из формы
+            content: str = clean_html(comment_edit_form.content.data)
+
             # Редактирование комментария через REST API
             # Подготовка данных
             json_params: dict = {
-                "content": comment_edit_form.content.data
+                "content": content
             }
             # Запрос
             response: requests.Response = request_session.put(

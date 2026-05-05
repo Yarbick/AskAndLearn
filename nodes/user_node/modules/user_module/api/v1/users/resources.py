@@ -10,6 +10,7 @@ from flask_restful import Resource
 # Безопасность
 from security.csrf import create_csrf_request_session
 from security.rate_limiter import api_route_limits
+from security.xss import clean_html
 
 # Парсеры
 from .parsers import UserParsers
@@ -44,7 +45,7 @@ class UserResource(Resource):
         """PUT запрос для изменения пользователя"""
 
         # Получение данных из парсера
-        parser_data: dict = UserParsers.put_parser.parse_args()
+        parser_data: dict = clean_html(UserParsers.put_parser.parse_args())
         user_password: str | None = parser_data.pop("password", None)
 
         # Изменение данных в БД
@@ -136,7 +137,7 @@ class UserListResource(Resource):
         """GET запрос для получения данных пользователей"""
 
         # Получение данных из парсера
-        parser_data: dict = UserParsers.get_list_parser.parse_args()
+        parser_data: dict = clean_html(UserParsers.get_list_parser.parse_args())
 
         # Получение пользователей из БД
         with db_manager.create_session() as db_session:
@@ -156,7 +157,7 @@ class UserListResource(Resource):
         """POST запрос для создания пользователя"""
 
         # Получение данных из парсера
-        parser_data: dict = UserParsers.post_parser.parse_args()
+        parser_data: dict = clean_html(UserParsers.post_parser.parse_args())
         user_password: str = parser_data.pop("password")
 
         # Добавление в БД

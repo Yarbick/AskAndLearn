@@ -9,6 +9,7 @@ from flask_login import current_user, login_required
 # Безопасность
 from security.csrf import create_csrf_request_session
 from security.file import Image
+from security.xss import clean_html
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -111,10 +112,13 @@ def view(question_id: int):
 
     # Создание комментария (POST)
     if comment_create_form.validate_on_submit():
+        # Чтение данных из формы
+        content: str = clean_html(comment_create_form.content.data)
+
         # Создание комментария через REST API
         # Подготовка данных
         json_params: dict = {
-            "content": comment_create_form.content.data,
+            "content": content,
             "creator_id": current_user.id,
             "question_id": question_id
         }
@@ -259,6 +263,11 @@ def create():
 
     # Процесс создания формы (POST)
     if question_create_form.validate_on_submit():
+        # Чтение данных из формы
+        name: str = clean_html(question_create_form.name.data)
+        tags: str = clean_html(question_create_form.tags.data)
+        content: str = clean_html(question_create_form.content.data)
+
         # Обработка изображения
         image: FileStorage = question_create_form.image.data
         if image:
@@ -270,7 +279,7 @@ def create():
                 # Составление имени файла
                 file_extension: str = secured_filename.split(".")[-1]
                 filename: str = Image.full_clearing_filename(
-                    f"{current_user.id}_{current_user.login}_{question_create_form.name.data}.{file_extension}"
+                    f"{current_user.id}_{current_user.login}_{name}.{file_extension}"
                 )
             else:
                 # Обработка ошибок
@@ -280,10 +289,10 @@ def create():
         # Создание вопроса через REST API
         # Подготовка данных
         json_params: dict = {
-            "name": question_create_form.name.data,
+            "name": name,
             "creator_id": current_user.id,
-            "tags": question_create_form.tags.data.strip(),
-            "content": question_create_form.content.data.strip()
+            "tags": tags,
+            "content": content
         }
         if image: json_params["image"] = filename
         # Запрос
@@ -340,6 +349,11 @@ def edit(question_id: int):
 
         # Процесс редактирования вопроса (POST)
         if question_edit_form.validate_on_submit():
+            # Чтение данных из формы
+            name: str = clean_html(question_edit_form.name.data)
+            tags: str = clean_html(question_edit_form.tags.data)
+            content: str = clean_html(question_edit_form.content.data)
+
             # Обработка изображения
             image: FileStorage = question_edit_form.image.data
             if image:
@@ -361,9 +375,9 @@ def edit(question_id: int):
             # Редактирование вопроса через REST API
             # Подготовка данных
             json_params: dict = {
-                "name": question_edit_form.name.data,
-                "tags": question_edit_form.tags.data.strip(),
-                "content": question_edit_form.content.data.strip()
+                "name": name,
+                "tags": tags,
+                "content": content
             }
             if image: json_params["image"] = filename
             # Запрос
@@ -581,21 +595,30 @@ def search():
 
     # Запрос на поиск через форму (POST)
     if search_form.validate_on_submit():
+        # Чтение данных из формы
+        filter_data: str = clean_html(search_form.search.data)
+
         # Обновление страницы с параметрами для поиска
         return redirect(url_for(
             "question.search",
-            filter=search_form.search.data,
+            filter=filter_data,
             filter_mode="name"
         ))
 
     # Процесс поиска (параметры передаётся через параметры ссылки)
     found_questions: list[dict] = []
-    if request.args.get("filter_mode"):
+    # Получение данных из параметров ссылки
+    filter_data: str | None = request.args.get("filter")
+    filter_mode: str | None = request.args.get("filter_mode")
+    if filter_data is not None and filter_mode is not None:
+        # Очистка данных от HTML
+        filter_data, filter_mode = clean_html(filter_data), clean_html(filter_mode)
+
         # Поиск вопросов через REST API
         # Подготовка данных
         json_params: dict = {
-            "filter": request.args.get("filter"),
-            "filter_mode": request.args.get("filter_mode")
+            "filter": filter_data,
+            "filter_mode": filter_mode
         }
         # Запрос
         response = requests.get(

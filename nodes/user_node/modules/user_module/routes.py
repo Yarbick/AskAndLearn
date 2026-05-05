@@ -9,6 +9,7 @@ from flask_login import current_user, login_required
 # Безопасность
 from security.csrf import create_csrf_request_session
 from security.file import Image
+from security.xss import clean_html
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -83,6 +84,10 @@ def edit():
 
     # Процесс редактирования профиля (POST)
     if edit_form.validate_on_submit():
+        # Чтение данных из формы
+        name: str = clean_html(edit_form.name.data)
+        description: str = clean_html(edit_form.description.data)
+
         # Обработка иконки пользователя
         icon: FileStorage = edit_form.icon.data
         if icon:
@@ -107,8 +112,8 @@ def edit():
         # Изменение данных через REST API
         # Подготовка данных
         json_params: dict = {
-            "name": edit_form.name.data,
-            "description": edit_form.description.data
+            "name": name,
+            "description": description
         }
         if icon: json_params["icon"] = new_icon_filename
         # Запрос
@@ -162,16 +167,21 @@ def delete():
 
     # Удаление аккаунта (POST)
     if delete_form.validate_on_submit():
+        # Чтение данных из формы
+        login: str = clean_html(delete_form.login.data)
+        password: str = clean_html(delete_form.password.data)
+        accepted: bool = delete_form.accept_deleting.data
+
         # Проверка логина
-        if current_user.login != delete_form.login.data:
+        if current_user.login != login:
             flash("Invalid login", "error")
             return redirect(url_for("user.delete"))
         # Проверка пароля
-        if not current_user.check_password(delete_form.password.data):
+        if not current_user.check_password(password):
             flash("Invalid password", "error")
             return redirect(url_for("user.delete"))
         # Проверка на подтверждение
-        if not delete_form.accept_deleting.data:
+        if not accepted:
             flash("Confirm the action", "error")
             return redirect(url_for("user.delete"))
 
@@ -255,21 +265,30 @@ def search():
 
     # Запрос на поиск через форму (POST)
     if search_form.validate_on_submit():
+        # Чтение данных из формы
+        filter_data: str = clean_html(search_form.search.data)
+
         # Обновление страницы с параметрами для поиска
         return redirect(url_for(
             "user.search",
-            filter=search_form.search.data,
+            filter=filter_data,
             filter_mode="name-login"
         ))
 
     # Процесс поиска (параметры передаётся через параметры ссылки)
     found_users: list = []
-    if request.args.get("filter_mode"):
+    # Получение данных из параметров ссылки
+    filter_data: str | None = request.args.get("filter")
+    filter_mode: str | None = request.args.get("filter_mode")
+    if filter_data is not None and filter_mode is not None:
+        # Очистка данных от HTML
+        filter_data, filter_mode = clean_html(filter_data), clean_html(filter_mode)
+
         # Поиск вопросов через REST API
         # Подготовка данных
         json_params: dict = {
-            "filter": request.args.get("filter"),
-            "filter_mode": request.args.get("filter_mode")
+            "filter": filter_data,
+            "filter_mode": filter_mode
         }
         # Запрос
         response: requests.Response = requests.get(

@@ -9,6 +9,7 @@ from flask_restful import Resource
 
 # Безопасность
 from security.rate_limiter import api_route_limits
+from security.xss import clean_html
 
 # Парсеры
 from .parsers import FriendshipParsers
@@ -49,7 +50,7 @@ class FriendshipResource(Resource):
         """PUT запрос для изменения дружбы"""
 
         # Получение данных из парсера
-        status: str = FriendshipParsers.put_parser.parse_args()["status"]
+        status: str = clean_html(FriendshipParsers.put_parser.parse_args())["status"]
 
         # Изменение данных в БД (учитываются обе стороны)
         with db_manager.create_session() as db_session:
@@ -107,7 +108,7 @@ class FriendshipListResource(Resource):
         """GET запрос для получения данных о дружбах пользователя"""
 
         # Получение данных из парсера
-        parser_params: dict = FriendshipParsers.get_list_parser.parse_args()
+        parser_params: dict = clean_html(FriendshipParsers.get_list_parser.parse_args())
 
         # Получение дружб из БД
         with db_manager.create_session() as db_session:
@@ -132,7 +133,7 @@ class FriendshipListResource(Resource):
 
     def post(self, user_id: int) -> requests.Response:
         # Получение данных из парсера
-        parser_data: dict = FriendshipParsers.post_parser.parse_args()
+        parser_data: dict = clean_html(FriendshipParsers.post_parser.parse_args())
 
         # Добавление в БД (учитываются обе стороны)
         with db_manager.create_session() as db_session:

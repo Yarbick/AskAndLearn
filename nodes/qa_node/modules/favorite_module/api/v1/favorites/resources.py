@@ -9,6 +9,7 @@ from flask_restful import Resource
 
 # Безопасность
 from security.rate_limiter import api_route_limits
+from security.xss import clean_html
 
 # Парсеры
 from .parsers import FavoriteParsers
@@ -71,7 +72,7 @@ class FavoriteListResource(Resource):
         """GET запрос для получения избранных"""
 
         # Получение данных из парсера
-        parser_params: dict = FavoriteParsers.get_list_parser.parse_args()
+        parser_params: dict = clean_html(FavoriteParsers.get_list_parser.parse_args())
 
         # Получение избранных вопросов из БД
         with db_manager.create_session() as db_session:
@@ -99,7 +100,7 @@ class FavoriteListResource(Resource):
         """POST запрос для добавления вопроса в избранные пользователя"""
 
         # Получение данных из парсера
-        parser_data: dict = FavoriteParsers.post_parser.parse_args()
+        parser_data: dict = clean_html(FavoriteParsers.post_parser.parse_args())
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
@@ -128,7 +129,7 @@ class FavoriteListResource(Resource):
         """DELETE запрос для очистки избранных пользователя"""
 
         # Получение данных из парсера
-        parser_params: dict = FavoriteParsers.get_list_parser.parse_args()
+        parser_params: dict = clean_html(FavoriteParsers.get_list_parser.parse_args())
 
         # Удаление избранных вопросов из БД
         with db_manager.create_session() as db_session:

@@ -12,6 +12,7 @@ from .blueprint import bp
 # Безопасность
 from security.csrf import create_csrf_request_session
 from security.rate_limiter import limiter
+from security.xss import clean_html
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -43,17 +44,24 @@ def register():
 
     # Процесс регистрации (POST)
     if register_form.validate_on_submit():
+        # Чтение данных из формы
+        name: str = clean_html(register_form.name.data)
+        login_: str = clean_html(register_form.login.data)
+        password: str = clean_html(register_form.password.data)
+        repeat_password: str = clean_html(register_form.repeat_password.data)
+        remember_me: bool = register_form.remember_me.data
+
         # Проверка на совпадение паролей
-        if register_form.password.data != register_form.repeat_password.data:
+        if password != repeat_password:
             flash("Passwords don't match", "error")
             return redirect(url_for("auth.register"))
 
         # Создание пользователя через REST API
         # Подготовка данных
         json_params: dict = {
-            "name": register_form.name.data,
-            "login": register_form.login.data,
-            "password": register_form.password.data
+            "name": name,
+            "login": login_,
+            "password": password
         }
         # Запрос
         response: requests.Response = request_session.post(
@@ -70,7 +78,7 @@ def register():
 
             if user:
                 # Вход в аккаунт
-                login_user(user, remember=register_form.remember_me.data)
+                login_user(user, remember=remember_me)
 
                 # Переключение на главную страницу
                 return redirect("/")
@@ -97,20 +105,25 @@ def login():
     # Процесс авторизации (POST)
     if login_form.validate_on_submit():
         with db_manager.create_session() as db_session:
+            # Чтение данных из формы
+            login_: str = clean_html(login_form.login.data)
+            password: str = clean_html(login_form.password.data)
+            remember_me: bool = login_form.remember_me.data
+
             # Получение пользователя
-            user: User | None = db_session.query(User).filter(User.login == login_form.login.data).first()
+            user: User | None = db_session.query(User).filter(User.login == login_).first()
 
             # Проверка на существование пользователя
             if not user:
                 flash("Invalid login", "error")
                 return redirect(url_for("auth.login"))
             # Проверка пароля
-            if not user.check_password(login_form.password.data):
+            if not user.check_password(password):
                 flash("Invalid password", "error")
                 return redirect(url_for("auth.login"))
 
             # Вход в аккаунт
-            login_user(user, remember=login_form.remember_me.data)
+            login_user(user, remember=remember_me)
 
             # Переключение на главную страницу
             return redirect("/")
@@ -151,23 +164,29 @@ def change_password():
 
     # Процесс изменения пароля (POST)
     if change_password_form.validate_on_submit():
+        # Чтение данных из формы
+        login_: str = clean_html(change_password_form.login.data)
+        old_password: str = clean_html(change_password_form.old_password.data)
+        new_password: str = clean_html(change_password_form.new_password.data)
+        repeat_new_password: str = clean_html(change_password_form.repeat_new_password.data)
+
         # Проверка логина
-        if not current_user.login == change_password_form.login.data:
+        if not current_user.login == login_:
             flash("Invalid login", "error")
             return redirect(url_for("auth.change_password"))
         # Проверка пароля
-        if not current_user.check_password(change_password_form.old_password.data):
+        if not current_user.check_password(old_password):
             flash("Invalid password", "error")
             return redirect(url_for("auth.change_password"))
         # Проверка на совпадение новых паролей
-        if change_password_form.new_password.data != change_password_form.repeat_new_password.data:
+        if new_password != repeat_new_password:
             flash("New passwords don't match", "error")
             return redirect(url_for("auth.change_password"))
 
         # Изменение пароля через REST API
         # Подготовка данных
         json_params: dict = {
-            "password": change_password_form.new_password.data
+            "password": new_password
         }
         # Запрос
         response: requests.Response = request_session.put(

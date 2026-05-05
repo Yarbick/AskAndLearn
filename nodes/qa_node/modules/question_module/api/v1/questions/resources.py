@@ -9,6 +9,7 @@ from flask_restful import Resource
 
 # Безопасность
 from security.rate_limiter import api_route_limits
+from security.xss import clean_html
 
 # Парсеры
 from .parsers import QuestionParsers
@@ -48,7 +49,7 @@ class QuestionResource(Resource):
         """PUT запрос для изменения вопроса"""
 
         # Получение данных из парсера
-        parser_data: dict = QuestionParsers.put_parser.parse_args()
+        parser_data: dict = clean_html(QuestionParsers.put_parser.parse_args())
         tags: list | None = None if parser_data.get("tags", None) is None else parser_data.pop("tags", "").split(", ")
 
         # Изменение данных в БД
@@ -158,7 +159,7 @@ class QuestionListResource(Resource):
             return query.all()
 
         # Получение данных из парсера
-        parser_data: dict = QuestionParsers.get_list_parser.parse_args()
+        parser_data: dict = clean_html(QuestionParsers.get_list_parser.parse_args())
         limit: int | None = parser_data.get("limit", None)
 
         # Получение вопросов из БД
@@ -204,7 +205,7 @@ class QuestionListResource(Resource):
         """POST запрос для создания вопроса"""
 
         # Получение данных из парсера
-        parser_data: dict = QuestionParsers.post_parser.parse_args()
+        parser_data: dict = clean_html(QuestionParsers.post_parser.parse_args())
         tags: list | None = None if parser_data.get("tags", None) is None else parser_data.pop("tags", "").split(", ")
 
         # Добавление в БД
@@ -250,7 +251,7 @@ class QuestionListResource(Resource):
         """PATCH запрос для удаления связи вопросов с автором"""
 
         # Получение данных из парсера
-        creator_id: int = QuestionParsers.patch_delete_creator_relationship.parse_args()["creator_id"]
+        creator_id: int = clean_html(QuestionParsers.patch_delete_creator_relationship.parse_args())["creator_id"]
 
         # Удаление связи вопросов с автором в БД
         with db_manager.create_session() as db_session:

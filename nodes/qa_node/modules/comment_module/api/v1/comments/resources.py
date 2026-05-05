@@ -9,6 +9,7 @@ from flask_restful import Resource
 
 # Безопасность
 from security.rate_limiter import api_route_limits
+from security.xss import clean_html
 
 # Парсеры
 from .parsers import CommentParsers
@@ -48,7 +49,7 @@ class CommentResource(Resource):
         """PUT запрос для изменения комментария"""
 
         # Получение данных из парсера
-        parser_data: dict = CommentParsers.put_parser.parse_args()
+        parser_data: dict = clean_html(CommentParsers.put_parser.parse_args())
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
@@ -93,7 +94,7 @@ class CommentResource(Resource):
         """PATCH запрос для изменения состояния is_useful"""
 
         # Получение данных из парсера
-        comment_data: dict = CommentParsers.patch_useful_parser.parse_args()
+        parser_data: dict = clean_html(CommentParsers.patch_useful_parser.parse_args())
 
         # Изменение данных в БД
         with db_manager.create_session() as db_session:
@@ -105,7 +106,7 @@ class CommentResource(Resource):
             CommentValidators.is_question_closed(comment)
 
             # Изменение состояния is_useful
-            comment.is_useful = comment_data["is_useful"]
+            comment.is_useful = parser_data["is_useful"]
 
             # Сохранение изменений
             db_session.commit()
@@ -124,7 +125,7 @@ class CommentListResource(Resource):
         """GET запрос для получения данных о комментариях"""
 
         # Получение данных из парсера
-        parser_data = CommentParsers.get_list_parser.parse_args()
+        parser_data = clean_html(CommentParsers.get_list_parser.parse_args())
 
         # Получение комментариев из БД
         with db_manager.create_session() as db_session:
@@ -150,7 +151,7 @@ class CommentListResource(Resource):
         """POST запрос для создания комментария"""
 
         # Получение данных из парсера
-        parser_data: dict = CommentParsers.post_parser.parse_args()
+        parser_data: dict = clean_html(CommentParsers.post_parser.parse_args())
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
@@ -175,7 +176,7 @@ class CommentListResource(Resource):
         """PATCH запрос для удаления связи с создателем"""
 
         # Получение данных из парсера
-        creator_id: int = CommentParsers.patch_delete_creator_relationship.parse_args()["creator_id"]
+        creator_id: int = clean_html(CommentParsers.patch_delete_creator_relationship.parse_args())["creator_id"]
 
         # Удаление связи комментариев с создателем в БД
         with db_manager.create_session() as db_session:
