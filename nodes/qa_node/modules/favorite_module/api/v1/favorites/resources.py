@@ -4,7 +4,12 @@
 from flask import jsonify, make_response
 
 # Работа с REST API
+import requests
 from flask_restful import Resource
+
+# Безопасность
+from security.rate_limiter import api_route_limits
+from security.xss import clean_html
 
 # Парсеры
 from .parsers import FavoriteParsers
@@ -13,18 +18,23 @@ from .parsers import FavoriteParsers
 from .validators import FavoriteAborts, FavoriteValidators
 
 # Работа с ORM
-from qa_node import db_manager
-from qa_node.data.models.favorite import Favorite
-from qa_node.data.models.question import Question
+from nodes.qa_node import db_manager
+from nodes.qa_node.data.models.favorite import Favorite
+from nodes.qa_node.data.models.question import Question
 
 
 class FavoriteResource(Resource):
     """Ресурс одного избранного вопроса"""
 
-    def get(self, favorite_id: int):
+    # Декораторы
+    decorators = api_route_limits.copy()
+
+    def get(self, favorite_id: int) -> requests.Response:
+        """GET запрос для получения данных об избранном вопросе"""
+
         # Получение избранного вопроса из БД
         with db_manager.create_session() as db_session:
-            favorite: Favorite = db_session.get(Favorite, favorite_id)
+            favorite: Favorite | None = db_session.get(Favorite, favorite_id)
             # Проверки
             FavoriteValidators.is_exists(favorite)
 
@@ -33,11 +43,13 @@ class FavoriteResource(Resource):
                 "id", "question.id", "question.name", "question.tags.name", "user_id"
             ])})
 
-    def delete(self, favorite_id: int):
+    def delete(self, favorite_id: int) -> requests.Response:
+        """DELETE запрос для удаления вопроса из избранных пользователя"""
+
         # Удаление из БД
         with db_manager.create_session() as db_session:
             # Получение избранного вопроса из БД
-            favorite: Favorite = db_session.get(Favorite, favorite_id)
+            favorite: Favorite | None = db_session.get(Favorite, favorite_id)
             # Проверки
             FavoriteValidators.is_exists(favorite)
             FavoriteValidators.is_available(favorite)
@@ -53,20 +65,25 @@ class FavoriteResource(Resource):
 class FavoriteListResource(Resource):
     """Ресурс списка избранных вопросов"""
 
-    def get(self):
+    # Декораторы
+    decorators = api_route_limits.copy()
+
+    def get(self) -> requests.Response:
+        """GET запрос для получения избранных"""
+
         # Получение данных из парсера
-        params = FavoriteParsers.get_list_parser.parse_args()
+        parser_params: dict = clean_html(FavoriteParsers.get_list_parser.parse_args())
 
         # Получение избранных вопросов из БД
         with db_manager.create_session() as db_session:
-            if params["search"]:  # С фильтром
-                if not params["search_mode"] or params["search_mode"] == "user":  # Фильтр по пользователю
-                    user_id: int = int(params["search"])
+            if parser_params["filter"]:  # С фильтром
+                if not parser_params["filter_mode"] or parser_params["filter_mode"] == "user":  # Фильтр по пользователю
+                    user_id: int = int(parser_params["filter"])
                     favorites: list[Favorite] = db_session.query(Favorite).filter(
                         Favorite.user_id == user_id
                     ).all()
-                elif params["search_mode"] == "question":  # Фильтр по вопросу
-                    question_id: int = int(params["search"])
+                elif parser_params["filter_mode"] == "question":  # Фильтр по вопросу
+                    question_id: int = int(parser_params["filter"])
                     favorites: list[Favorite] = db_session.query(Favorite).filter(
                         Favorite.question_id == question_id
                     ).all()
@@ -79,22 +96,26 @@ class FavoriteListResource(Resource):
                 for favorite in favorites
             ]})
 
-    def post(self):
+    def post(self) -> requests.Response:
+        """POST запрос для добавления вопроса в избранные пользователя"""
+
         # Получение данных из парсера
-        favorite_data: dict = FavoriteParsers.post_parser.parse_args()
+        parser_data: dict = clean_html(FavoriteParsers.post_parser.parse_args())
 
         # Добавление в БД
         with db_manager.create_session() as db_session:
             # Проверки
             if db_session.query(Favorite).filter(
-                    Favorite.user_id == favorite_data["user_id"], Favorite.question_id == favorite_data["question_id"]
+                    Favorite.user_id == parser_data["user_id"], Favorite.question_id == parser_data["question_id"]
             ).first(): FavoriteAborts.already_exists()
 
             # Добавление вопроса в избранные пользователя
-            favorite: Favorite = Favorite()
-            for field_name, value in favorite_data.items():
+            favorite: Favorite | None = Favorite()
+            for field_name, value in parser_data.items():
                 setattr(favorite, field_name, value)
             # Проверки
+            question: Question | None = db_session.get(Question, favorite.question_id)
+            FavoriteValidators.is_exists(question)
             FavoriteValidators.is_available(favorite)
 
             # Добавление объекта в БД
@@ -104,21 +125,23 @@ class FavoriteListResource(Resource):
             # Вывод результата
             return make_response(jsonify({"id": favorite.id}), 201)
 
-    def delete(self):
+    def delete(self) -> requests.Response:
+        """DELETE запрос для очистки избранных пользователя"""
+
         # Получение данных из парсера
-        params = FavoriteParsers.get_list_parser.parse_args()
+        parser_params: dict = clean_html(FavoriteParsers.get_list_parser.parse_args())
 
         # Удаление избранных вопросов из БД
         with db_manager.create_session() as db_session:
             # Получение избранных вопросов
-            if params["search"]:  # С фильтром
-                if not params["search_mode"] or params["search_mode"] == "user":  # Фильтр по пользователю
-                    user_id: int = int(params["search"])
+            if parser_params["filter"]:  # С фильтром
+                if not parser_params["filter_mode"] or parser_params["filter_mode"] == "user":  # Фильтр по пользователю
+                    user_id: int = int(parser_params["filter"])
                     favorites: list[Favorite] = db_session.query(Favorite).filter(
                         Favorite.user_id == user_id
                     ).all()
-                elif params["search_mode"] == "question":  # Фильтр по вопросу
-                    question_id: int = int(params["search"])
+                elif parser_params["filter_mode"] == "question":  # Фильтр по вопросу
+                    question_id: int = int(parser_params["filter"])
                     favorites: list[Favorite] = db_session.query(Favorite).filter(
                         Favorite.question_id == question_id
                     ).all()

@@ -1,16 +1,14 @@
 """Валидаторы для REST API ресурса"""
-from dbm import error
 
-# Работа с фреймворком
+# Работа с пользователем
 from flask_login import current_user
 
 # Работа с REST API
 from flask_restful import abort
 
 # Работа с ORM
-from qa_node.data.models.comment import Comment
-
-from qa_node.data.models.question import Question
+from nodes.qa_node.data.models.comment import Comment
+from nodes.qa_node.data.models.question import Question
 
 
 class CommentAborts:
@@ -41,7 +39,7 @@ class CommentAborts:
         abort(403, error="Forbidden")
 
     @staticmethod
-    def question_closed():
+    def question_closed() -> None:
         """Вопрос закрыт"""
 
         abort(400, error="Question closed")

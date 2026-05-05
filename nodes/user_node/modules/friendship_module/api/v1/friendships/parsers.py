@@ -9,18 +9,16 @@ from dataclasses import dataclass
 
 @dataclass
 class FriendshipParsers:
-    get_list_parser = reqparse.RequestParser()
-    get_list_parser.add_argument(
-        "search", type=str, action="append",
-        choices=("accepted", "pending", "blocked"), default=["accepted", "pending", "blocked"]
-    )
-    get_list_parser.add_argument(
-        "search_mode", type=str, choices=("status",)
-    )
+    # Парсер для GET (FriendshipListResource) запроса
+    get_list_parser: reqparse.RequestParser = reqparse.RequestParser()
+    get_list_parser.add_argument("filter", type=str)
+    get_list_parser.add_argument("filter_mode", type=str, choices=("status",))
 
-    post_parser = reqparse.RequestParser()
+    # Парсер для POST (FriendshipListResource) запроса
+    post_parser: reqparse.RequestParser = reqparse.RequestParser()
     post_parser.add_argument("friend_id", type=int, required=True)
     post_parser.add_argument("status", type=str, required=True, choices=("accepted", "pending", "blocked"))
 
-    put_parser = reqparse.RequestParser()
+    # Парсер для PUT (FriendshipResource) запроса
+    put_parser: reqparse.RequestParser = reqparse.RequestParser()
     put_parser.add_argument("status", type=str, required=True, choices=("accepted", "pending", "blocked"))

@@ -3,7 +3,7 @@
 # Работа с фреймворком
 from flask import jsonify, redirect, url_for
 
-# Работа с формами
+# Безопасность
 from flask_wtf.csrf import generate_csrf
 
 # Подключение к приложению

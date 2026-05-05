@@ -1,4 +1,4 @@
-"""Обработчики маршрутов модуля Welcome"""
+"""Обработчики маршрутов модуля"""
 
 # Работа с фреймворком
 from flask import render_template
@@ -11,6 +11,7 @@ from .blueprint import bp
 def root():
     """Главная страница"""
 
+    # Отображение страницы (GET)
     return render_template(
-        "welcome.html"
+        "welcome/welcome.html"
     )

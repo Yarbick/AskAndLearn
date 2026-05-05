@@ -55,17 +55,31 @@
     padding-right: 25%;
     padding-left: 25%;
 }
-.truncate {
+.truncate-sm {
+    display: inline-block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 200px;
+    max-width: 150px;
+}
+.truncate-md {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+}
+.truncate-lg {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 900px;
 }
 .footer {
     margin-top: 5%;
 }
 .list-item {
-    display: flex;
     text-decoration: none;
     color: #000000;
     font-weight: 100%;

@@ -1,4 +1,4 @@
-"""Модель избранных"""
+"""ORM модель избранных"""
 
 # Работа с ORM
 import sqlalchemy as sa
@@ -9,7 +9,7 @@ from sqlalchemy_serializer import SerializerMixin
 
 
 class Favorite(SerializerMixin, db_manager.declarative_base):
-    """Модель избранных"""
+    """ORM модель избранных"""
 
     # Название
     __tablename__ = "favorite"

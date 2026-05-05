@@ -1,7 +1,9 @@
-"""Обработчики маршрутов модуля Friendship"""
+"""Обработчики маршрутов модуля"""
 
 # Работа с фреймворком
 from flask import render_template, url_for, redirect, request, flash
+
+# Работа с пользователем
 from flask_login import current_user, login_required
 
 # Безопасность
@@ -21,19 +23,19 @@ def create_friendship_view_handler(friendship_status: str) -> str:
     """Создание обработчика для просмотра связей пользователя с другими пользователями по статусу отношений"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
 
     # Дополнительные данные для отображения страницы
     title: str = friendship_status.lower().capitalize()
 
     # Получение связей с пользователями через REST API
     # Подготовка данных
-    json_params = {
-        "search": friendship_status.lower(),
-        "search_mode": "status"
+    json_params: dict = {
+        "filter": friendship_status.lower(),
+        "filter_mode": "status"
     }
     # Запрос
-    response = requests.get(
+    response: requests.Response = requests.get(
         f"{server_address}/api/v1/users/{current_user.id}/friendships",
         json=json_params
     )
@@ -41,14 +43,15 @@ def create_friendship_view_handler(friendship_status: str) -> str:
     # Обработка запроса
     if response:
         # Получение связей с другими пользователями
-        user_friendships: dict = response.json()["friendships"]
+        friendships: dict = response.json()["friendships"]
 
         # Отображение страницы (GET)
         return render_template(
             "friendship/view.html",
             title=title,
-            user_friendships=user_friendships
+            friendships=friendships
         )
+
     # Отображение страницы в случае ошибки (GET)
     return render_template(
         "friendship/view.html",
@@ -84,15 +87,15 @@ def view_blocked():
 @bp.route("/accept/<int:friend_id>", methods=["GET"])
 @login_required
 def accept(friend_id: int):
-    """Удаление связи между пользователями"""
+    """Принятие дружбы между пользователями"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление связи между пользователями через REST API
     # Подготовка данных
-    json_params = {
+    json_params: dict = {
         "status": "accepted"
     }
     # Запрос
@@ -104,6 +107,7 @@ def accept(friend_id: int):
 
     # Обработка запроса
     if response:
+        # Вывод сообщения
         flash("Friend request accepted", "info")
     else:
         # Обработка ошибок
@@ -120,23 +124,24 @@ def send_request(friend_id: int):
     """Создание запроса на дружбу с пользователем"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Создание связей между пользователями через REST API
     # Подготовка данных
-    json_params = {
+    json_params: dict = {
         "friend_id": friend_id,
         "status": "pending"
     }
     # Запрос
-    response = request_session.post(
+    response: requests.Response = request_session.post(
         f"{server_address}/api/v1/users/{current_user.id}/friendships",
         json=json_params
     )
 
     # Обработка запроса
     if response:
+        # Вывод сообщения
         flash("The request has been sent", "info")
     else:
         # Обработка ошибок
@@ -153,11 +158,12 @@ def block(friend_id: int):
     """Блокировка пользователя"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Блокировка пользователя через REST API
-    json_params = {
+    # Подготовка данных
+    json_params: dict = {
         "friend_id": friend_id,
         "status": "blocked"
     }
@@ -170,6 +176,7 @@ def block(friend_id: int):
 
     # Обработка запроса
     if response:
+        # Вывод сообщения
         flash("The user is blocked", "info")
     elif response.status_code == 404:
         # Создание новых отношений с блокировкой через REST API
@@ -181,6 +188,7 @@ def block(friend_id: int):
 
         # Обработка запроса
         if response:
+            # Вывод сообщения
             flash("The user is blocked", "info")
         else:
             # Обработка ошибок
@@ -200,7 +208,7 @@ def delete(friend_id: int):
     """Удаление связи между пользователями"""
 
     # Подготовка данных через REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление связи между пользователями через REST API
@@ -212,6 +220,7 @@ def delete(friend_id: int):
 
     # Обработка запроса
     if response:
+        # Вывод сообщения
         flash("The friendship was successfully deleted", "info")
     else:
         # Обработка ошибок

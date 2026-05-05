@@ -2,10 +2,13 @@
 
 # Работа с фреймворком
 from flask import render_template, url_for, redirect, request, flash
+
+# Работа с пользователем
 from flask_login import login_required
 
 # Безопасность
 from security.csrf import create_csrf_request_session
+from security.xss import clean_html
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -26,11 +29,11 @@ def edit(comment_id: int):
     """Редактирование комментария"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для редактирования комментария
-    comment_edit_form = CommentEditForm()
+    comment_edit_form: CommentEditForm = CommentEditForm()
 
     # Получение данных о комментарии через REST API
     # Запрос
@@ -38,14 +41,18 @@ def edit(comment_id: int):
 
     # Обработка запроса
     if response:
-        comment = response.json()["comment"]
+        # Получение комментария
+        comment: dict = response.json()["comment"]
 
         # Редактирование комментария (POST)
         if comment_edit_form.validate_on_submit():
+            # Чтение данных из формы
+            content: str = clean_html(comment_edit_form.content.data)
+
             # Редактирование комментария через REST API
             # Подготовка данных
-            json_params = {
-                "content": comment_edit_form.content.data
+            json_params: dict = {
+                "content": content
             }
             # Запрос
             response: requests.Response = request_session.put(
@@ -84,7 +91,7 @@ def delete(comment_id: id):
     """Удаление комментария"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление комментария через REST API
@@ -113,12 +120,12 @@ def set_useful(comment_id: int, useful_status: str):
     """Изменение состояния is_useful"""
 
     # Подготовка данных для REST API
-    server_address = f"{request.scheme}://{request.host}"
+    server_address: str = f"{request.scheme}://{request.host}"
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Изменение состояния is_closed через REST API
     # Подготовка данных
-    json_params = {
+    json_params: dict = {
         "is_useful": useful_status == "true"
     }
     # Запрос

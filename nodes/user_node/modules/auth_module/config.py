@@ -12,10 +12,10 @@ class Config:
     """Настройки модуля"""
 
     # Параметры
-    path = dirname(__file__)
-    name = "auth"
-    url_prefix = "/auth"
-    static_folder = "static"
-    static_url_path = join_path(path, static_folder)
-    self_template_folder = join_path(path, "templates")
-    other_template_folders = ["shared_templates"]
+    PATH: str = dirname(__file__)
+    NAME: str = "auth"
+    URL_PREFIX: str = "/auth"
+    STATIC_FOLDER: str = "static"
+    STATIC_URL_PATH: str = join_path(PATH, STATIC_FOLDER)
+    SELF_TEMPLATE_FOLDER: str = join_path(PATH, "templates")
+    OTHER_TEMPLATE_FOLDERS: tuple[str] = ("shared_templates",)

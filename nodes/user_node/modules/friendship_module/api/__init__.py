@@ -10,14 +10,14 @@ from flask_restful import Api
 from .v1.friendships.resources import FriendshipResource, FriendshipListResource
 
 # Создание и настройка Blueprint для API
-api_bp = Blueprint(
+api_bp: Blueprint = Blueprint(
     f"friendship_api",
     __name__,
     url_prefix="/api"
 )
 
 # Создание и настройка API
-api = Api(api_bp)
+api: Api = Api(api_bp)
 
 # Добавление ресурсов
 # Ресурсы friendships

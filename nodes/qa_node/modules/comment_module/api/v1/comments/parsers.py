@@ -9,21 +9,26 @@ from dataclasses import dataclass
 
 @dataclass
 class CommentParsers:
-    get_list_parser = reqparse.RequestParser()
+    # Парсер для GET (CommentListResource) запроса
+    get_list_parser: reqparse.RequestParser = reqparse.RequestParser()
     get_list_parser.add_argument("sort_mode", type=str, default="new", choices=("new", "old"))
-    get_list_parser.add_argument("search", type=str)
-    get_list_parser.add_argument("search_mode", type=str, choices=("question",))
+    get_list_parser.add_argument("filter", type=str)
+    get_list_parser.add_argument("filter_mode", type=str, choices=("question",))
 
-    post_parser = reqparse.RequestParser()
+    # Парсер для POST (CommentListResource) запроса
+    post_parser: reqparse.RequestParser = reqparse.RequestParser()
     post_parser.add_argument("content", type=str, required=True)
     post_parser.add_argument("creator_id", type=int, required=True)
     post_parser.add_argument("question_id", type=int, required=True)
 
-    put_parser = reqparse.RequestParser()
+    # Парсер для PUT (CommentResource) запроса
+    put_parser: reqparse.RequestParser = reqparse.RequestParser()
     put_parser.add_argument("content", type=str)
 
-    patch_useful_parser = reqparse.RequestParser()
+    # Парсер для PATCH (CommentResource) запроса, который отмечает комментарий "полезным"
+    patch_useful_parser: reqparse.RequestParser = reqparse.RequestParser()
     patch_useful_parser.add_argument("is_useful", type=bool)
 
-    patch_delete_creator_relationship = reqparse.RequestParser()
+    # Парсер для PATCH (CommentListResource) запроса, который удаляет связь с пользователем
+    patch_delete_creator_relationship: reqparse.RequestParser = reqparse.RequestParser()
     patch_delete_creator_relationship.add_argument("creator_id", type=int, required=True)

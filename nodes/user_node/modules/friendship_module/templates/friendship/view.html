@@ -24,9 +24,9 @@
                        href="{{ url_for('friendship.view_blocked') }}"><h5>Blocked</h5></a>
                 </li>
             </ul>
-            {% if user_friendships %}
+            {% if friendships %}
                 <div class="list-group">
-                    {% for friendship in user_friendships %}
+                    {% for friendship in friendships %}
                         <div class="list-group-item d-flex justify-content-between align-items-start">
                             <a href="{{ url_for('user.view', user_id=friendship['friend']['id'])}}"
                                class="friend-info">

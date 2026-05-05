@@ -3,9 +3,14 @@
 # Главное приложение
 from app import app
 
+# Работа с виртуальным окружением
+from os import environ
+
 
 def main():
-    app.run(host="127.0.0.1", port=8080)
+    # Запуск приложения
+    port: int = environ.get("PORT", 5000)
+    app.run(host="0.0.0.0", port=port)
 
 
 if __name__ == "__main__":

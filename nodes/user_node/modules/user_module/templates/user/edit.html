@@ -18,25 +18,27 @@
                     <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
                          class="profile-user-icon" alt="Download error">
                 {% endif %}
-                <div>
-                    <div class="mb-3">
-                        <h5><label for="nameField" class="form-label">
-                            {{ edit_form.name.label }}
-                        </label></h5>
-                        {{ edit_form.name(type="text", id="nameField", class="form-control") }}
-                    </div>
-                    <a type="button" class="btn btn-primary"
-                       href="{{ url_for('auth.change_password') }}">
-                        Change password
-                    </a>
-                    <h5><label class="form-label mt-2" for="iconFile">{{ edit_form.icon.label }}</label></h5>
-                    <div class="d-inline-flex gap-1">
-                        {{ edit_form.icon(class="form-control", type="file", id="iconFile", accept=".jpg,.jpeg,.png,.webp") }}
-                        {% if current_user.icon %}
-                            <a type="button" class="btn btn-danger" href="{{ url_for('user.delete_icon') }}" style="width: 150px;">
-                                Delete icon
-                            </a>
-                        {% endif %}
+                <div class="content-sub-container d-flex container-fluid">
+                    <div>
+                        <div class="mb-3">
+                            <h5><label for="nameField" class="form-label">
+                                {{ edit_form.name.label }}
+                            </label></h5>
+                            {{ edit_form.name(type="text", id="nameField", class="form-control") }}
+                        </div>
+                        <a type="button" class="btn btn-primary"
+                           href="{{ url_for('auth.change_password') }}">
+                            Change password
+                        </a>
+                        <h5><label class="form-label mt-2" for="iconFile">{{ edit_form.icon.label }}</label></h5>
+                        <div class="d-inline-flex gap-1">
+                            {{ edit_form.icon(class="form-control", type="file", id="iconFile", accept=".jpg,.jpeg,.png,.webp") }}
+                            {% if current_user.icon %}
+                                <a type="button" class="btn btn-danger" href="{{ url_for('user.delete_icon') }}" style="width: 150px;">
+                                    Delete icon
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

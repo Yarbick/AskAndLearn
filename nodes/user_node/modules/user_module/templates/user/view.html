@@ -18,37 +18,39 @@
                         <img src="{{ url_for('user.static', filename='users_icons/default_icon.webp') }}"
                              class="profile-user-icon" alt="Download error">
                     {% endif %}
-                    <div>
-                        <h1 class="profile-user-name">{{ displayed_user["name"] }}</h1>
-                        <a href="{{ url_for('user.view', user_id=displayed_user['id']) }}" class="profile-user-login">
-                            {{ displayed_user["login"] }}
-                        </a>
-                    </div>
-                    {% if displayed_user["id"] != current_user.id %}
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end" style="width: 100%;">
-                            <div>
-                                {% if current_user.is_authenticated and displayed_user["id"] != current_user.id %}
-                                    {% if not friendship %}
-                                        <a type="button" class="btn btn-primary"
-                                           href="{{ url_for('friendship.send_request', friend_id=displayed_user['id']) }}">
-                                            Send friendship request
-                                        </a>
-                                    {% endif %}
-                                    {% if friendship and friendship["status"] == "blocked" and friendship["last_changed_by"] == current_user.id %}
-                                        <a type="button" class="btn btn-success"
-                                           href="{{ url_for('friendship.delete', friend_id=displayed_user['id'], next=request.url) }}">
-                                            Unblock
-                                        </a>
-                                    {% else %}
-                                        <a type="button" class="btn btn-danger"
-                                           href="{{ url_for('friendship.block', friend_id=displayed_user['id'], next=request.url) }}">
-                                            Block
-                                        </a>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
+                    <div class="content-sub-container d-flex container-fluid ps-4">
+                        <div>
+                            <h1 class="profile-user-name">{{ displayed_user["name"] }}</h1>
+                            <a href="{{ url_for('user.view', user_id=displayed_user['id']) }}" class="profile-user-login">
+                                {{ displayed_user["login"] }}
+                            </a>
                         </div>
-                    {% endif %}
+                        {% if displayed_user["id"] != current_user.id %}
+                            <div class="d-grid gap-2 justify-content-end" style="width: 100%;">
+                                <div>
+                                    {% if current_user.is_authenticated and displayed_user["id"] != current_user.id %}
+                                        {% if not friendship %}
+                                            <a type="button" class="btn btn-primary"
+                                               href="{{ url_for('friendship.send_request', friend_id=displayed_user['id']) }}">
+                                                Send friendship request
+                                            </a>
+                                        {% endif %}
+                                        {% if friendship and friendship["status"] == "blocked" and friendship["last_changed_by"] == current_user.id %}
+                                            <a type="button" class="btn btn-success"
+                                               href="{{ url_for('friendship.delete', friend_id=displayed_user['id'], next=request.url) }}">
+                                                Unblock
+                                            </a>
+                                        {% else %}
+                                            <a type="button" class="btn btn-danger"
+                                               href="{{ url_for('friendship.block', friend_id=displayed_user['id'], next=request.url) }}">
+                                                Block
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card text-bg-light mt-5">
                     <h3 class="card-header">User description</h3>

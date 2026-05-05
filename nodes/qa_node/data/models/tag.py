@@ -1,4 +1,4 @@
-"""Модель тега вопроса"""
+"""ORM модель тега вопроса"""
 
 # Работа с ORM
 import sqlalchemy as sa
@@ -8,7 +8,7 @@ from .. import db_manager
 from sqlalchemy_serializer import SerializerMixin
 
 # Промежуточная таблица между тегами и вопросами
-tag_to_question = sa.Table(
+tag_to_question: sa.Table = sa.Table(
     "tag_to_question",
     db_manager.declarative_base.metadata,
     sa.Column("tag_id", sa.Integer, sa.ForeignKey("tag.id"), nullable=False),
@@ -17,7 +17,7 @@ tag_to_question = sa.Table(
 
 
 class Tag(SerializerMixin, db_manager.declarative_base):
-    """Модель тега вопроса"""
+    """ORM модель тега вопроса"""
 
     # Название
     __tablename__ = "tag"

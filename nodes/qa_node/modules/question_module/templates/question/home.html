@@ -5,7 +5,7 @@
 {% block content %}
     <div class="content-container">
         <h1 class="content-header-left">Home</h1>
-        <div>
+        <div class="content-sub-container mt-3">
             <h2 class="content-sub-header mb-4">Have a question?</h2>
             <div class="row" style="margin-left: 20%; margin-right: 20%;">
                 <a type="button" class="btn btn-success btn-lg col" href="{{ url_for('question.search') }}">
@@ -17,7 +17,7 @@
                 </a>
             </div>
         </div>
-        <div class="mt-5">
+        <div class="mt-4">
             <div class="d-flex gap-4">
                 <div class="content-sub-container container-fluid">
                     <h2>Newest questions</h2>
@@ -25,12 +25,12 @@
                         {% if newest_questions %}
                             {% for question in newest_questions %}
                                 <div class="list-group-item list-group-item-action list-item-word-wrap">
-                                    <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
+                                    <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item truncate-md">
                                         {{ question["name"] }}
                                     </a>
                                     <div style="line-height: 2.2;">
                                         {% for tag in question["tags"] %}
-                                            <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                            <a type="button" class="btn btn-dark btn-sm truncate-sm" href="{{ url_for('question.search', filter=tag['name'], filter_mode='tag') }}">
                                                 {{ tag["name"] }}
                                             </a>
                                         {% endfor %}
@@ -48,12 +48,12 @@
                         {% if last_questions %}
                             {% for question in last_questions %}
                                 <div class="list-group-item list-group-item-action list-item-word-wrap">
-                                    <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
+                                    <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item truncate-md">
                                         {{ question["name"] }}
                                     </a>
                                     <div style="line-height: 2.2;">
                                         {% for tag in question["tags"] %}
-                                            <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                            <a type="button" class="btn btn-dark btn-sm truncate-sm" href="{{ url_for('question.search', filter=tag['name'], filter_mode='tag') }}">
                                                 {{ tag["name"] }}
                                             </a>
                                         {% endfor %}
@@ -72,12 +72,12 @@
                     {% if your_questions %}
                         {% for question in your_questions %}
                             <div class="list-group-item list-group-item-action list-item-word-wrap">
-                                <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item">
+                                <a href="{{ url_for('question.view', question_id=question['id'])}}" class="list-item truncate-lg">
                                     {{ question["name"] }}
                                 </a>
                                 <div style="line-height: 2.2;">
                                     {% for tag in question["tags"] %}
-                                        <a type="button" class="btn btn-dark btn-sm truncate" href="{{ url_for('question.search', search=tag['name'], search_mode='tag') }}">
+                                        <a type="button" class="btn btn-dark btn-sm truncate-sm" href="{{ url_for('question.search', filter=tag['name'], filter_mode='tag') }}">
                                             {{ tag["name"] }}
                                         </a>
                                     {% endfor %}
