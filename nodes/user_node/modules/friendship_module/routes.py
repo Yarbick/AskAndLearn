@@ -15,6 +15,9 @@ from exceptions.api.rest.shared import ResponseErrorHandler
 # Подключение к модулю
 from .blueprint import bp
 
+# Настройки приложения
+from app.config import get_server_address
+
 # Работа с REST API
 import requests
 
@@ -23,7 +26,7 @@ def create_friendship_view_handler(friendship_status: str) -> str:
     """Создание обработчика для просмотра связей пользователя с другими пользователями по статусу отношений"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Дополнительные данные для отображения страницы
     title: str = friendship_status.lower().capitalize()
@@ -90,7 +93,7 @@ def accept(friend_id: int):
     """Принятие дружбы между пользователями"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление связи между пользователями через REST API
@@ -124,7 +127,7 @@ def send_request(friend_id: int):
     """Создание запроса на дружбу с пользователем"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Создание связей между пользователями через REST API
@@ -158,7 +161,7 @@ def block(friend_id: int):
     """Блокировка пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Блокировка пользователя через REST API
@@ -208,7 +211,7 @@ def delete(friend_id: int):
     """Удаление связи между пользователями"""
 
     # Подготовка данных через REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление связи между пользователями через REST API

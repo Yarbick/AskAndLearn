@@ -15,6 +15,9 @@ from exceptions.api.rest.shared import ResponseErrorHandler
 # Подключение к модулю
 from .blueprint import bp
 
+# Настройки приложения
+from app.config import get_server_address
+
 # Работа с REST API
 import requests
 
@@ -25,7 +28,7 @@ def view():
     """Просмотр избранных вопросов у пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Получение избранных вопросов пользователя через REST API
     # Подготовка данных
@@ -63,7 +66,7 @@ def create(question_id: int):
     """Добавление вопроса в избранные"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Добавление вопроса в избранные через REST API
@@ -98,7 +101,7 @@ def delete(favorite_id: int):
     """Удаление вопроса из избранных"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Удаление вопроса из избранных через REST API

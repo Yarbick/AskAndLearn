@@ -11,11 +11,12 @@ csp_config: dict = {
     "default-src": ["\'self\'"],
     "script-src": [
         "\'self\'",
-        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     ],
     "style-src": [
         "\'self\'",
-        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        "\'unsafe-inline\'",
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
     ],
     "img-src": ["\'self\'", "data:"],
     "frame-ancestors": ["\'none\'"],

@@ -1,10 +1,16 @@
 """Настройки приложения"""
 
+# Работа с фреймворком
+from flask import request
+
 # Безопасность
 from os import urandom
 
 # Работа с путями
 from os.path import join as join_path, dirname
+
+# Работа с виртуальным окружением
+from os import getenv
 
 # Работа с временем
 from datetime import timedelta
@@ -33,3 +39,14 @@ class Config:
     SESSION_COOKIE_SAMESITE: str = "Lax"
     SESSION_REFRESH_EACH_REQUEST: bool = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+
+
+def get_server_address() -> str:
+    """Получение адреса сервера"""
+
+    # Получение адреса
+    scheme: str = request.scheme
+    host: str = request.host
+    server_address: str = f"{scheme}://{host}"
+
+    return server_address

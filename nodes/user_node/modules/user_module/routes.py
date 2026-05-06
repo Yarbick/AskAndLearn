@@ -17,7 +17,8 @@ from exceptions.api.rest.shared import ResponseErrorHandler
 # Подключение к модулю
 from .blueprint import bp
 
-# Настройки модуля
+# Настройки приложения
+from app.config import get_server_address
 from .config import Config
 
 # Работа с REST API
@@ -38,7 +39,7 @@ def view(user_id: int):
     """Просмотр пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Получение данных о пользователе через REST API
     # Запрос
@@ -76,7 +77,7 @@ def edit():
     """Редактирование пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для редактирования профиля
@@ -128,9 +129,9 @@ def edit():
             # Обработка иконки
             if icon:
                 # Удаление старой иконки
-                if old_icon_filename: remove_file(f"{Config.STATIC_URL_PATH}/users_icons/{old_icon_filename}")
+                if old_icon_filename: remove_file(f"{Config.STATIC_PATH}/users_icons/{old_icon_filename}")
                 # Сохранение новой иконки
-                icon.save(f"{Config.STATIC_URL_PATH}/users_icons/{new_icon_filename}")
+                icon.save(f"{Config.STATIC_PATH}/users_icons/{new_icon_filename}")
 
             # Вывод сообщения
             flash("Account settings have been changed", "info")
@@ -159,7 +160,7 @@ def delete():
     """Удаление пользователя"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
     request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма удаления пользователя
@@ -198,7 +199,7 @@ def delete():
         # Обработка запроса
         if response:
             # Удаление иконки
-            if icon_filename: remove_file(f"{Config.STATIC_URL_PATH}/users_icons/{icon_filename}")
+            if icon_filename: remove_file(f"{Config.STATIC_PATH}/users_icons/{icon_filename}")
 
             # Вывод сообщения
             flash("Account deleted", "info")
@@ -240,7 +241,7 @@ def delete_icon():
     # Обработка запроса
     if response:
         # Удаление иконки
-        if current_user.icon: remove_file(f"{Config.STATIC_URL_PATH}/users_icons/{current_user.icon}")
+        if current_user.icon: remove_file(f"{Config.STATIC_PATH}/users_icons/{current_user.icon}")
 
         # Вывод сообщения
         flash("The icon has been deleted", "info")
@@ -258,7 +259,7 @@ def search():
     """Поиск пользователей"""
 
     # Подготовка данных для REST API
-    server_address: str = f"{request.scheme}://{request.host}"
+    server_address: str = get_server_address()
 
     # Форма для поиска
     search_form: SearchForm = SearchForm()

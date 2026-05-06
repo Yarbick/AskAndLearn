@@ -16,6 +16,6 @@ class Config:
     NAME: str = "comment"
     URL_PREFIX: str = "/comment"
     STATIC_FOLDER: str = "static"
-    STATIC_URL_PATH: str = join_path(PATH, STATIC_FOLDER)
+    STATIC_URL_PATH: str = f"{URL_PREFIX}/{STATIC_FOLDER}"
     SELF_TEMPLATE_FOLDER: str = join_path(PATH, "templates")
     OTHER_TEMPLATE_FOLDERS: tuple[str] = ("shared_templates",)
