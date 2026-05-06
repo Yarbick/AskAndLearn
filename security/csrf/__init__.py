@@ -1,7 +1,7 @@
 """Защита от CSRF атак"""
 
 # Работа с фреймворком
-from flask import url_for
+from flask import url_for, request
 
 # Работа с REST API
 import requests
@@ -12,10 +12,11 @@ def create_csrf_request_session(server_address: str) -> requests.Session:
 
     # Создание сессии
     request_session: requests.Session = requests.Session()
-    request_session.verify = False  # Отключаю, потому что не понимаю как исправить баг на Replit c SSL ключами
 
     # Получение CSRF-токена
-    response: requests.Response = request_session.get(f"{server_address}{url_for("get_csrf_token")}")
+    response: requests.Response = request_session.get(
+        f"{server_address}{url_for("get_csrf_token")}"
+    )
     csrf_token: str = response.json()["csrf_token"]
     # Добавление токена в заголовок
     request_session.headers["X-CSRFToken"] = csrf_token

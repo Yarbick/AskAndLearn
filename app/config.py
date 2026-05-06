@@ -1,5 +1,8 @@
 """Настройки приложения"""
 
+# Работа с фреймворком
+from flask import request
+
 # Безопасность
 from os import urandom
 
@@ -41,4 +44,9 @@ class Config:
 def get_server_address() -> str:
     """Получение адреса сервера"""
 
-    return getenv("REPL_URL", f"http://127.0.0.1:{getenv("PORT", 5000)}")
+    # Получение адреса
+    scheme: str = request.scheme
+    host: str = request.host
+    server_address: str = f"{scheme}://{host}"
+
+    return server_address

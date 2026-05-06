@@ -1,4 +1,4 @@
-#!/bin/bash
+#!
 cd "." # Your app working directory!!!
 export PORT=5000
 unset PIP_USER
