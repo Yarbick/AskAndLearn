@@ -23,7 +23,7 @@ class QuestionAborts:
     def unauthorized() -> None:
         """Пользователь не авторизован"""
 
-        abort(403, error="Unauthorized")
+        abort(401, error="Unauthorized")
 
     @staticmethod
     def forbidden() -> None:

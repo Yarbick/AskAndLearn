@@ -16,6 +16,7 @@ class Config:
     NAME: str = "user"
     URL_PREFIX: str = "/user"
     STATIC_FOLDER: str = "static"
+    STATIC_PATH: str = f"{PATH}/{STATIC_FOLDER}"
     STATIC_URL_PATH: str = f"{URL_PREFIX}/{STATIC_FOLDER}"
     SELF_TEMPLATE_FOLDER: str = join_path(PATH, "templates")
     OTHER_TEMPLATE_FOLDERS: tuple[str] = ("shared_templates",)

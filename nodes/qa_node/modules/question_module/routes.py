@@ -306,7 +306,7 @@ def create():
         # Обработка запроса
         if response:
             # Сохранение изображения
-            if image: image.save(f"{Config.STATIC_URL_PATH}/questions_images/{filename}")
+            if image: image.save(f"{Config.STATIC_PATH}/questions_images/{filename}")
 
             # Вывод сообщения
             flash("The question has been created", "info")
@@ -393,9 +393,9 @@ def edit(question_id: int):
                 if image:
                     # Удаление старого изображения
                     if question["image"]:
-                        remove_file(f"{Config.STATIC_URL_PATH}/questions_images/{question["image"]}")
+                        remove_file(f"{Config.STATIC_PATH}/questions_images/{question["image"]}")
                     # Сохранение изображения
-                    image.save(f"{Config.STATIC_URL_PATH}/questions_images/{filename}")
+                    image.save(f"{Config.STATIC_PATH}/questions_images/{filename}")
 
                 # Вывод сообщения
                 flash("The question has been edited", "info")
@@ -453,7 +453,7 @@ def delete(question_id: int):
         # Обработка запроса
         if response:
             # Удаление изображения
-            if question["image"]: remove_file(f"{Config.STATIC_URL_PATH}/questions_images/{question["image"]}")
+            if question["image"]: remove_file(f"{Config.STATIC_PATH}/questions_images/{question["image"]}")
 
             # Вывод сообщения
             flash("Question deleted", "info")
@@ -506,7 +506,7 @@ def delete_image(question_id: int):
             # Обработка запроса
             if response:
                 # Удаление изображения
-                remove_file(f"{Config.STATIC_URL_PATH}/questions_images/{question["image"]}")
+                remove_file(f"{Config.STATIC_PATH}/questions_images/{question["image"]}")
 
                 # Вывод сообщения
                 flash("The question image has been deleted", "info")

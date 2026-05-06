@@ -129,9 +129,9 @@ def edit():
             # Обработка иконки
             if icon:
                 # Удаление старой иконки
-                if old_icon_filename: remove_file(f"{Config.STATIC_URL_PATH}/users_icons/{old_icon_filename}")
+                if old_icon_filename: remove_file(f"{Config.STATIC_PATH}/users_icons/{old_icon_filename}")
                 # Сохранение новой иконки
-                icon.save(f"{Config.STATIC_URL_PATH}/users_icons/{new_icon_filename}")
+                icon.save(f"{Config.STATIC_PATH}/users_icons/{new_icon_filename}")
 
             # Вывод сообщения
             flash("Account settings have been changed", "info")
@@ -199,7 +199,7 @@ def delete():
         # Обработка запроса
         if response:
             # Удаление иконки
-            if icon_filename: remove_file(f"{Config.STATIC_URL_PATH}/users_icons/{icon_filename}")
+            if icon_filename: remove_file(f"{Config.STATIC_PATH}/users_icons/{icon_filename}")
 
             # Вывод сообщения
             flash("Account deleted", "info")
@@ -241,7 +241,7 @@ def delete_icon():
     # Обработка запроса
     if response:
         # Удаление иконки
-        if current_user.icon: remove_file(f"{Config.STATIC_URL_PATH}/users_icons/{current_user.icon}")
+        if current_user.icon: remove_file(f"{Config.STATIC_PATH}/users_icons/{current_user.icon}")
 
         # Вывод сообщения
         flash("The icon has been deleted", "info")
