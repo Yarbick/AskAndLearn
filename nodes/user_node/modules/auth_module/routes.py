@@ -14,7 +14,6 @@ from app.config import get_server_address
 
 # Безопасность
 from security.user import create_user_request_session
-from security.csrf import create_csrf_request_session
 from security.rate_limiter import limiter
 from security.xss import clean_html
 from secrets import token_urlsafe
@@ -58,7 +57,6 @@ def register():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для регистрации
     register_form: RegisterForm = RegisterForm()
@@ -85,7 +83,7 @@ def register():
             "password": password
         }
         # Запрос
-        response: requests.Response = request_session.post(
+        response: requests.Response = requests.post(
             f"{server_address}/api/v1/users",
             json=json_params
         )
@@ -189,7 +187,7 @@ def change_password():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для изменения пароля
     change_password_form: ChangePasswordForm = ChangePasswordForm()

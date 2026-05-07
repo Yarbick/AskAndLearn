@@ -3,6 +3,9 @@
 # Работа с фреймворком
 from flask import Flask
 
+# Настройки приложения
+from app.config import Config
+
 # Безопасность
 from flask_talisman import Talisman
 
@@ -32,15 +35,15 @@ def init_talisman(app: Flask) -> Talisman:
     talisman: Talisman = Talisman(
         app,
         content_security_policy=csp_config,
-        force_https=False,
+        force_https=Config.FORCE_HTTPS,
         frame_options="DENY",
         frame_options_allow_from=None,
         strict_transport_security=True,
         strict_transport_security_max_age=60 * 60 * 24 * 365,
         strict_transport_security_include_subdomains=True,
-        session_cookie_secure=False,
-        session_cookie_http_only=True,
-        session_cookie_samesite="Lax",
+        session_cookie_secure=Config.SESSION_COOKIE_SECURE,
+        session_cookie_http_only=Config.SESSION_COOKIE_HTTPONLY,
+        session_cookie_samesite=Config.SESSION_COOKIE_SAMESITE,
         x_content_type_options=True,
         x_xss_protection=True
     )

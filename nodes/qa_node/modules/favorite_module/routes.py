@@ -67,7 +67,7 @@ def create(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Добавление вопроса в избранные через REST API
     # Подготовка данных
@@ -101,7 +101,7 @@ def delete(favorite_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Удаление вопроса из избранных через REST API
     # Запрос

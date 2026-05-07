@@ -78,7 +78,7 @@ class UserResource(Resource):
 
         # Подготовка данных для REST API
         server_address: str = get_server_address()
-        request_session: requests.Session = create_user_request_session(server_address)
+        request_session: requests.Session = create_user_request_session()
 
         # Удаление из БД
         with db_manager.create_session() as db_session:

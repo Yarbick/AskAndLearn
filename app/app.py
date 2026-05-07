@@ -7,7 +7,7 @@ from flask import Flask
 from flask_login import LoginManager
 
 # Безопасность
-from flask_wtf import CSRFProtect
+from security.csrf import csrf_protect
 from security.rate_limiter import limiter
 from flask_talisman import Talisman
 from security.talisman import init_talisman
@@ -26,6 +26,7 @@ app: Flask = Flask(
 app.config["SECRET_KEY"] = Config.SECRET_KEY
 app.config["MAX_CONTENT_LENGTH"] = Config.MAX_CONTENT_LENGTH
 app.config["SESSION_COOKIE_NAME"] = Config.SESSION_COOKIE_NAME
+app.config["SESSION_COOKIE_SECURE"] = Config.SESSION_COOKIE_SAMESITE
 app.config["SESSION_COOKIE_HTTPONLY"] = Config.SESSION_COOKIE_HTTPONLY
 app.config["SESSION_COOKIE_SAMESITE"] = Config.SESSION_COOKIE_SAMESITE
 app.config["SESSION_REFRESH_EACH_REQUEST"] = Config.SESSION_REFRESH_EACH_REQUEST
@@ -33,9 +34,11 @@ app.config["PERMANENT_SESSION_LIFETIME"] = Config.PERMANENT_SESSION_LIFETIME
 app.config['WTF_CSRF_ENABLED'] = Config.WTF_CSRF_ENABLED
 app.config['WTF_CSRF_CHECK_DEFAULT'] = Config.WTF_CSRF_CHECK_DEFAULT
 app.config['WTF_CSRF_HEADERS'] = Config.WTF_CSRF_HEADERS
+app.config['DEBUG'] = Config.DEBUG
+app.config['TESTING'] = Config.TESTING
 
 # Создание CSRF-защиты
-csrf_protect: CSRFProtect = CSRFProtect(app)
+csrf_protect.init_app(app)
 
 # Инициализация лимитера
 limiter.init_app(app)

@@ -106,7 +106,7 @@ def view(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для создания комментария
     comment_create_form: CommentCreateForm = CommentCreateForm()
@@ -256,7 +256,7 @@ def create():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для создания вопроса
     question_create_form: QuestionCreateForm = QuestionCreateForm()
@@ -332,7 +332,7 @@ def edit(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для изменения вопроса
     question_edit_form: QuestionEditForm = QuestionEditForm()
@@ -429,7 +429,7 @@ def delete(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Получение данных о вопросе через REST API
     # Запрос
@@ -475,7 +475,7 @@ def delete_image(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Получение данных о вопросе через REST API
     # Запрос
@@ -524,7 +524,7 @@ def set_solved(question_id: int, solved_status: str):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Изменение состояния is_solved через REST API
     # Подготовка данных
@@ -554,7 +554,7 @@ def set_closed(question_id: int, closed_status: str):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Изменение состояния is_closed через REST API
     # Подготовка данных

@@ -94,7 +94,7 @@ def accept(friend_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Удаление связи между пользователями через REST API
     # Подготовка данных
@@ -127,7 +127,7 @@ def send_request(friend_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Создание связей между пользователями через REST API
     # Подготовка данных
@@ -161,7 +161,7 @@ def block(friend_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Блокировка пользователя через REST API
     # Подготовка данных
@@ -210,7 +210,7 @@ def delete(friend_id: int):
 
     # Подготовка данных через REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Удаление связи между пользователями через REST API
     # Запрос

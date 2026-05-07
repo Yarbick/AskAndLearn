@@ -8,7 +8,6 @@ from flask_login import current_user, login_required
 
 # Безопасность
 from security.user import create_user_request_session
-from security.csrf import create_csrf_request_session
 from security.file import Image
 from security.xss import clean_html
 
@@ -79,7 +78,7 @@ def edit():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для редактирования профиля
     edit_form: EditForm = EditForm()
@@ -161,7 +160,7 @@ def delete():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма удаления пользователя
     delete_form: DeleteForm = DeleteForm()
@@ -223,7 +222,7 @@ def delete_icon():
 
     # Подготовка данных для REST API
     server_address = f"{request.scheme}://{request.host}"
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Удаление названия иконки из БД через REST API
     # Подготовка данных

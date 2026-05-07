@@ -33,7 +33,7 @@ def edit(comment_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для редактирования комментария
     comment_edit_form: CommentEditForm = CommentEditForm()
@@ -94,7 +94,7 @@ def delete(comment_id: id):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Удаление комментария через REST API
     # Запрос
@@ -122,7 +122,7 @@ def set_useful(comment_id: int, useful_status: str):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_user_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Изменение состояния is_closed через REST API
     # Подготовка данных
