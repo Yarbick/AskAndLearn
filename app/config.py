@@ -34,7 +34,7 @@ class Config:
     WTF_CSRF_ENABLED: bool = True
     WTF_CSRF_CHECK_DEFAULT: bool = True
     WTF_CSRF_HEADERS: tuple[str] = ("X-CSRFToken",)
-    SESSION_COOKIE_NAME: str = "main_session"
+    SESSION_COOKIE_NAME: str = "askandlearn_session"
     SESSION_COOKIE_HTTPONLY: bool = True
     SESSION_COOKIE_SAMESITE: str = "Lax"
     SESSION_REFRESH_EACH_REQUEST: bool = True

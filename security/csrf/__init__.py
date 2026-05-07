@@ -1,7 +1,7 @@
 """Защита от CSRF атак"""
 
 # Работа с фреймворком
-from flask import url_for, request
+from flask import url_for
 
 # Работа с REST API
 import requests

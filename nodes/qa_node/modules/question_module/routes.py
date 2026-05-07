@@ -7,7 +7,7 @@ from flask import render_template, url_for, redirect, request, flash, session as
 from flask_login import current_user, login_required
 
 # Безопасность
-from security.csrf import create_csrf_request_session
+from security.user import create_user_request_session
 from security.file import Image
 from security.xss import clean_html
 
@@ -106,7 +106,7 @@ def view(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Форма для создания комментария
     comment_create_form: CommentCreateForm = CommentCreateForm()
@@ -126,8 +126,7 @@ def view(question_id: int):
         # Запрос
         response: requests.Response = request_session.post(
             f"{server_address}/api/v1/comments",
-            json=json_params,
-            cookies=request.cookies
+            json=json_params
         )
 
         # Обработка запроса
@@ -257,7 +256,7 @@ def create():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Форма для создания вопроса
     question_create_form: QuestionCreateForm = QuestionCreateForm()
@@ -299,8 +298,7 @@ def create():
         # Запрос
         response: requests.Response = request_session.post(
             f"{server_address}/api/v1/questions",
-            json=json_params,
-            cookies=request.cookies
+            json=json_params
         )
 
         # Обработка запроса
@@ -334,7 +332,7 @@ def edit(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Форма для изменения вопроса
     question_edit_form: QuestionEditForm = QuestionEditForm()
@@ -384,8 +382,7 @@ def edit(question_id: int):
             # Запрос
             response: requests.Response = request_session.put(
                 f"{server_address}/api/v1/questions/{question_id}",
-                json=json_params,
-                cookies=request.cookies
+                json=json_params
             )
 
             # Обработка запроса
@@ -432,7 +429,7 @@ def delete(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Получение данных о вопросе через REST API
     # Запрос
@@ -446,8 +443,7 @@ def delete(question_id: int):
         # Удаление вопроса через REST API
         # Запрос
         response: requests.Response = request_session.delete(
-            f"{server_address}/api/v1/questions/{question_id}",
-            cookies=request.cookies
+            f"{server_address}/api/v1/questions/{question_id}"
         )
 
         # Обработка запроса
@@ -479,7 +475,7 @@ def delete_image(question_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Получение данных о вопросе через REST API
     # Запрос
@@ -499,8 +495,7 @@ def delete_image(question_id: int):
             # Запрос
             response: requests.Response = request_session.put(
                 f"{server_address}/api/v1/questions/{question_id}",
-                json=json_params,
-                cookies=request.cookies
+                json=json_params
             )
 
             # Обработка запроса
@@ -529,7 +524,7 @@ def set_solved(question_id: int, solved_status: str):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Изменение состояния is_solved через REST API
     # Подготовка данных
@@ -539,8 +534,7 @@ def set_solved(question_id: int, solved_status: str):
     # Запрос
     response: requests.Response = request_session.put(
         f"{server_address}/api/v1/questions/{question_id}",
-        json=json_params,
-        cookies=request.cookies
+        json=json_params
     )
 
     # Обработка запроса
@@ -560,7 +554,7 @@ def set_closed(question_id: int, closed_status: str):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Изменение состояния is_closed через REST API
     # Подготовка данных
@@ -570,8 +564,7 @@ def set_closed(question_id: int, closed_status: str):
     # Запрос
     response: requests.Response = request_session.put(
         f"{server_address}/api/v1/questions/{question_id}",
-        json=json_params,
-        cookies=request.cookies
+        json=json_params
     )
 
     # Обработка запроса

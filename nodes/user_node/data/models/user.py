@@ -17,6 +17,9 @@ from flask_login import UserMixin, login_user
 # Связь с другими моделями
 from .friendship import Friendship
 
+# Работа с кешем
+from cache.cacher import CacheManager
+
 
 class User(UserMixin, SerializerMixin, db_manager.declarative_base):
     """ORM модель пользователя"""
@@ -62,3 +65,17 @@ def load_user(user_id: str) -> User:
 
     with db_manager.create_session() as db_session:
         return db_session.get(User, int(user_id))
+
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    """Загрузка пользователя по токену авторизации"""
+
+    token: str = request.headers.get("Auth-Token")
+    if token:
+        # Получение ID по токену из кеша
+        user_id: int | None = CacheManager.get(token)
+
+        if user_id:
+            return load_user(str(user_id))
+    return None

@@ -8,7 +8,7 @@ import requests
 from flask_restful import Resource
 
 # Безопасность
-from security.csrf import create_csrf_request_session
+from security.user import create_user_request_session
 from security.rate_limiter import api_route_limits
 from security.xss import clean_html
 
@@ -78,7 +78,7 @@ class UserResource(Resource):
 
         # Подготовка данных для REST API
         server_address: str = get_server_address()
-        request_session: requests.Session = create_csrf_request_session(server_address)
+        request_session: requests.Session = create_user_request_session(server_address)
 
         # Удаление из БД
         with db_manager.create_session() as db_session:
@@ -100,13 +100,11 @@ class UserResource(Resource):
             # Запросы
             request_session.patch(
                 f"{server_address}/api/v1/questions",
-                json=json_params,
-                cookies=request.cookies
+                json=json_params
             )  # Удаление связей с вопросами
             request_session.patch(
                 f"{server_address}/api/v1/comments",
-                json=json_params,
-                cookies=request.cookies
+                json=json_params
             )  # Удаление связей с комментариями
 
             # Очистка избранных через REST API
@@ -118,8 +116,7 @@ class UserResource(Resource):
             # Запросы
             request_session.delete(
                 f"{server_address}/api/v1/favorites",
-                json=json_params,
-                cookies=request.cookies
+                json=json_params
             )
 
             # Удаление пользователя

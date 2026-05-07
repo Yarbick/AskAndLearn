@@ -7,7 +7,7 @@ from flask import render_template, url_for, redirect, request, flash
 from flask_login import current_user, login_required
 
 # Безопасность
-from security.csrf import create_csrf_request_session
+from security.user import create_user_request_session
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -94,7 +94,7 @@ def accept(friend_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Удаление связи между пользователями через REST API
     # Подготовка данных
@@ -104,8 +104,7 @@ def accept(friend_id: int):
     # Запрос
     response: requests.Response = request_session.put(
         f"{server_address}/api/v1/users/{current_user.id}/friendships/{friend_id}",
-        json=json_params,
-        cookies=request.cookies
+        json=json_params
     )
 
     # Обработка запроса
@@ -128,7 +127,7 @@ def send_request(friend_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Создание связей между пользователями через REST API
     # Подготовка данных
@@ -162,7 +161,7 @@ def block(friend_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Блокировка пользователя через REST API
     # Подготовка данных
@@ -173,8 +172,7 @@ def block(friend_id: int):
     # Запрос
     response: requests.Response = request_session.put(
         f"{server_address}/api/v1/users/{current_user.id}/friendships/{friend_id}",
-        json={"status": json_params["status"]},
-        cookies=request.cookies
+        json={"status": json_params["status"]}
     )
 
     # Обработка запроса
@@ -212,13 +210,12 @@ def delete(friend_id: int):
 
     # Подготовка данных через REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session(server_address)
 
     # Удаление связи между пользователями через REST API
     # Запрос
     response: requests.Response = request_session.delete(
-        f"{server_address}/api/v1/users/{current_user.id}/friendships/{friend_id}",
-        cookies=request.cookies
+        f"{server_address}/api/v1/users/{current_user.id}/friendships/{friend_id}"
     )
 
     # Обработка запроса
