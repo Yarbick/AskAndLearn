@@ -1,10 +1,7 @@
 """Обработчики маршрутов главного приложения"""
 
 # Работа с фреймворком
-from flask import jsonify, redirect, url_for
-
-# Безопасность
-from flask_wtf.csrf import generate_csrf
+from flask import redirect, url_for
 
 # Подключение к приложению
 from .app import app
@@ -15,10 +12,3 @@ def unauthorized(error):
     """Предложение зарегистрироваться при ошибке 401"""
 
     return redirect(url_for("auth.register"))
-
-
-@app.route("/get_csrf_token", methods=["GET"])
-def get_csrf_token():
-    """Получение CSRF-токена"""
-
-    return jsonify({"csrf_token": generate_csrf()})

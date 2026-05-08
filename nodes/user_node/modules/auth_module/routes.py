@@ -13,9 +13,10 @@ from .blueprint import bp
 from app.config import get_server_address
 
 # Безопасность
-from security.csrf import create_csrf_request_session
+from security.user import create_user_request_session
 from security.rate_limiter import limiter
 from security.xss import clean_html
+from secrets import token_urlsafe
 
 # Обработка ошибок
 from exceptions.api.rest.shared import ResponseErrorHandler
@@ -32,15 +33,30 @@ from .forms.auth.change_password import ChangePasswordForm
 from nodes.user_node import db_manager
 from nodes.user_node.data.models.user import User
 
+# Работа с кешем
+from cache.cacher import CacheManager
+
+
+def generate_auth_token(user_id: int) -> str:
+    """Генерация токена для авторизации пользователя"""
+
+    # Генерация токена
+    raw_token: str = token_urlsafe(32)
+
+    # Сохранение токена в кеш для авторизации пользователя
+    CacheManager.set(raw_token, user_id)
+
+    # Возвращение токена
+    return raw_token
+
 
 @bp.route("/register", methods=["GET", "POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("10 per minute")
 def register():
     """Регистрация"""
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
 
     # Форма для регистрации
     register_form: RegisterForm = RegisterForm()
@@ -67,7 +83,7 @@ def register():
             "password": password
         }
         # Запрос
-        response: requests.Response = request_session.post(
+        response: requests.Response = requests.post(
             f"{server_address}/api/v1/users",
             json=json_params
         )
@@ -82,6 +98,10 @@ def register():
             if user:
                 # Вход в аккаунт
                 login_user(user, remember=remember_me)
+
+                # Создание токена аутентификации для обращения к API
+                auth_token: str = generate_auth_token(user.id)
+                flask_session["auth_token"] = auth_token
 
                 # Переключение на главную страницу
                 return redirect("/")
@@ -98,7 +118,7 @@ def register():
 
 
 @bp.route("/login", methods=["GET", "POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("10 per minute")
 def login():
     """Авторизация"""
 
@@ -128,6 +148,10 @@ def login():
             # Вход в аккаунт
             login_user(user, remember=remember_me)
 
+            # Создание токена аутентификации для обращения к API
+            auth_token: str = generate_auth_token(user.id)
+            flask_session["auth_token"] = auth_token
+
             # Переключение на главную страницу
             return redirect("/")
 
@@ -142,6 +166,9 @@ def login():
 def logout():
     """Выход из аккаунта"""
 
+    # Удаление хэша авторизации
+    CacheManager.delete(flask_session.get("auth_token"))
+
     # Удаление cookie-сессий
     flask_session.clear()
 
@@ -154,13 +181,13 @@ def logout():
 
 @bp.route("/change_password", methods=["GET", "POST"])
 @login_required
-@limiter.limit("5 per minute")
+@limiter.limit("10 per minute")
 def change_password():
     """Изменение пароля"""
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для изменения пароля
     change_password_form: ChangePasswordForm = ChangePasswordForm()
@@ -194,8 +221,7 @@ def change_password():
         # Запрос
         response: requests.Response = request_session.put(
             f"{server_address}/api/v1/users/{current_user.id}",
-            json=json_params,
-            cookies=request.cookies
+            json=json_params
         )
 
         # Проверка на успешность выполнения

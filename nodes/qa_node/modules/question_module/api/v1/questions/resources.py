@@ -77,7 +77,7 @@ class QuestionResource(Resource):
                 question.tags.clear()
 
                 # Создание новых тегов
-                for tag_name in tags:
+                for tag_name in set(tags):
                     if tag_name:
                         # Получение тега из БД
                         tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()
@@ -228,7 +228,7 @@ class QuestionListResource(Resource):
 
             # Добавление тегов
             if tags is not None:
-                for tag_name in tags:
+                for tag_name in set(tags):
                     if tag_name:
                         # Получение тега из БД
                         tag: Tag = db_session.query(Tag).filter(Tag.name == tag_name).first()

@@ -7,7 +7,7 @@ from flask import render_template, url_for, redirect, request, flash
 from flask_login import current_user, login_required
 
 # Безопасность
-from security.csrf import create_csrf_request_session
+from security.user import create_user_request_session
 from security.file import Image
 from security.xss import clean_html
 
@@ -78,7 +78,7 @@ def edit():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для редактирования профиля
     edit_form: EditForm = EditForm()
@@ -120,8 +120,7 @@ def edit():
         # Запрос
         response: requests.Response = request_session.put(
             f"{server_address}/api/v1/users/{current_user.id}",
-            json=json_params,
-            cookies=request.cookies
+            json=json_params
         )
 
         # Обработка запроса
@@ -161,7 +160,7 @@ def delete():
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма удаления пользователя
     delete_form: DeleteForm = DeleteForm()
@@ -192,8 +191,7 @@ def delete():
         # Удаление пользователя через REST API
         # Запрос
         response: requests.Response = request_session.delete(
-            f"{server_address}/api/v1/users/{current_user.id}",
-            cookies=request.cookies
+            f"{server_address}/api/v1/users/{current_user.id}"
         )
 
         # Обработка запроса
@@ -224,7 +222,7 @@ def delete_icon():
 
     # Подготовка данных для REST API
     server_address = f"{request.scheme}://{request.host}"
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Удаление названия иконки из БД через REST API
     # Подготовка данных
@@ -234,8 +232,7 @@ def delete_icon():
     # Запрос
     response: requests.Response = request_session.put(
         f"{server_address}/api/v1/users/{current_user.id}",
-        json=json_params,
-        cookies=request.cookies
+        json=json_params
     )
 
     # Обработка запроса

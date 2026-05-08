@@ -7,7 +7,7 @@ from flask import render_template, url_for, redirect, request, flash
 from flask_login import login_required
 
 # Безопасность
-from security.csrf import create_csrf_request_session
+from security.user import create_user_request_session
 from security.xss import clean_html
 
 # Обработка ошибок
@@ -33,7 +33,7 @@ def edit(comment_id: int):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Форма для редактирования комментария
     comment_edit_form: CommentEditForm = CommentEditForm()
@@ -60,8 +60,7 @@ def edit(comment_id: int):
             # Запрос
             response: requests.Response = request_session.put(
                 f"{server_address}/api/v1/comments/{comment_id}",
-                json=json_params,
-                cookies=request.cookies
+                json=json_params
             )
 
             # Обработка запроса
@@ -95,13 +94,12 @@ def delete(comment_id: id):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Удаление комментария через REST API
     # Запрос
     response: requests.Response = request_session.delete(
-        f"{server_address}/api/v1/comments/{comment_id}",
-        cookies=request.cookies
+        f"{server_address}/api/v1/comments/{comment_id}"
     )
 
     # Обработка запроса
@@ -124,7 +122,7 @@ def set_useful(comment_id: int, useful_status: str):
 
     # Подготовка данных для REST API
     server_address: str = get_server_address()
-    request_session: requests.Session = create_csrf_request_session(server_address)
+    request_session: requests.Session = create_user_request_session()
 
     # Изменение состояния is_closed через REST API
     # Подготовка данных
@@ -134,8 +132,7 @@ def set_useful(comment_id: int, useful_status: str):
     # Запрос
     response: requests.Response = request_session.patch(
         f"{server_address}/api/v1/comments/{comment_id}",
-        json=json_params,
-        cookies=request.cookies
+        json=json_params
     )
 
     # Обработка запроса

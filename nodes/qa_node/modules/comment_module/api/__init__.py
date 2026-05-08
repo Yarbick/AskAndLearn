@@ -3,6 +3,9 @@
 # Работа с фреймворком
 from flask import Blueprint
 
+# Безопасность
+from security.csrf import api_route_csrf
+
 # Работа с REST API
 from flask_restful import Api
 
@@ -17,7 +20,7 @@ api_bp: Blueprint = Blueprint(
 )
 
 # Создание и настройка API
-api: Api = Api(api_bp)
+api: Api = Api(api_bp, decorators=api_route_csrf)
 
 # Добавление ресурсов
 # Ресурсы comments
