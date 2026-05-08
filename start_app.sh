@@ -16,7 +16,7 @@ source .venv/Scripts/activate
 if [ -f "requirements.txt" ]; then
     echo "Checking dependencies..."
     # We skip pip install if it fails, assuming packager_tool handled it
-    pip install -r requirements.txt || echo "Pip install failed, but continuing as packages might be pre-installed via system."
+    pip install -q -r requirements.txt || echo "Pip install failed, but continuing as packages might be pre-installed via system."
 fi
 
 echo "Starting application..."

@@ -25,4 +25,4 @@ class CacheManager:
     def delete(cls, key: Any) -> None:
         """Удаление данных из кеша"""
 
-        cls.storage.pop(key)
+        if key is not None: cls.storage.pop(key)

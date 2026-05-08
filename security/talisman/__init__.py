@@ -35,7 +35,7 @@ def init_talisman(app: Flask) -> Talisman:
     talisman: Talisman = Talisman(
         app,
         content_security_policy=csp_config,
-        force_https=Config.FORCE_HTTPS,
+        force_https=False,  # Отключаем HTTPS для талисмана, так как его предоставляет localhost.run
         frame_options="DENY",
         frame_options_allow_from=None,
         strict_transport_security=True,
