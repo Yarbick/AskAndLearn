@@ -1,16 +1,33 @@
 """Запуск"""
 
+# WSGI сервер
+from waitress import serve
+
+# Настройки сервера
+from config import Config
+
 # Главное приложение
 from app import app
 
-# Работа с виртуальным окружением
-from os import getenv
 
+def main() -> None:
+    """Запуск приложения"""
 
-def main():
-    # Запуск приложения
-    port: int = getenv("PORT", 5000)
-    app.run(host="127.0.0.1", port=port)
+    # Логи
+    print("\nLaunched the Waitress server...")
+    print("Press CTRL+C to stop the server")
+
+    # Запуск сервера
+    serve(
+        app,
+        host=Config.HOST,
+        port=Config.PORT,
+        threads=Config.THREADS,
+        max_request_header_size=Config.MAX_REQUEST_HEADER_SIZE,
+        max_request_body_size=Config.MAX_REQUEST_BODY_SIZE,
+        channel_timeout=Config.CHANNEL_TIMEOUT,
+        cleanup_interval=Config.CLEANUP_INTERVAL
+    )
 
 
 if __name__ == "__main__":
