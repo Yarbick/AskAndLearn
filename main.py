@@ -15,6 +15,7 @@ def main() -> None:
 
     # Логи
     print("\nLaunched the Waitress server...")
+    print(f"The application should be launched using the link: http://{Config.HOST}:{Config.PORT}")
     print("Press CTRL+C to stop the server")
 
     # Запуск сервера
