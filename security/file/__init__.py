@@ -5,7 +5,7 @@ import re
 from werkzeug.utils import secure_filename
 
 # Работа с изображениями
-import imghdr
+from filetype import guess_mime
 
 # Типизация
 from io import BytesIO
@@ -85,4 +85,5 @@ class Image(File):
         """Проверка MIME-типа, чтобы избежать загрузки вредоносного кода"""
 
         # Проверка
-        return imghdr.what(stream)
+        mime_type: str | None = guess_mime(stream)
+        return mime_type and "image" in mime_type
